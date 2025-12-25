@@ -3,18 +3,27 @@ import React from 'react';
 
 import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Colors } from '@/src/theme/constants';
+import { useGameContext } from '@/src/store/GameContext';
+import { GameStatus } from '@/src/models';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const { gameState } = useGameContext();
+  
+  // Show current game tab only if there's an active game
+  const showCurrentGameTab = gameState.status !== GameStatus.SETUP;
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarActiveTintColor: Colors.primary,
+        tabBarInactiveTintColor: Colors.textSecondary,
         headerShown: false,
         tabBarButton: HapticTab,
+        tabBarStyle: {
+          backgroundColor: Colors.backgroundPrimary,
+          borderTopColor: Colors.backgroundSecondary,
+        },
       }}>
       <Tabs.Screen
         name="index"
@@ -26,8 +35,9 @@ export default function TabLayout() {
       <Tabs.Screen
         name="explore"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: 'Partita Attuale',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="gamecontroller.fill" color={color} />,
+          href: showCurrentGameTab ? '/explore' : null, // Hide tab when no active game
         }}
       />
     </Tabs>

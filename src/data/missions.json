@@ -1,0 +1,129 @@
+{
+  "missions": [
+    {
+      "id": "1",
+      "text": "Fai ridere qualcuno senza che se ne accorga",
+      "difficulty": "easy"
+    },
+    {
+      "id": "2",
+      "text": "Convincere qualcuno a offrirti qualcosa da bere",
+      "difficulty": "medium"
+    },
+    {
+      "id": "3",
+      "text": "Fai un complimento a qualcuno sui suoi vestiti",
+      "difficulty": "easy"
+    },
+    {
+      "id": "4",
+      "text": "Chiedi a qualcuno di raccontarti una barzelletta",
+      "difficulty": "easy"
+    },
+    {
+      "id": "5",
+      "text": "Convincere qualcuno a cantare una canzone",
+      "difficulty": "hard"
+    },
+    {
+      "id": "6",
+      "text": "Fai dire a qualcuno la parola 'banana' in una conversazione",
+      "difficulty": "medium"
+    },
+    {
+      "id": "7",
+      "text": "Ottieni un high-five da qualcuno",
+      "difficulty": "easy"
+    },
+    {
+      "id": "8",
+      "text": "Convincere qualcuno a condividere un ricordo d'infanzia",
+      "difficulty": "medium"
+    },
+    {
+      "id": "9",
+      "text": "Fai dire a qualcuno il nome del suo animale domestico",
+      "difficulty": "easy"
+    },
+    {
+      "id": "10",
+      "text": "Convincere qualcuno a imitare un animale",
+      "difficulty": "hard"
+    },
+    {
+      "id": "11",
+      "text": "Fai dire a qualcuno qual è il suo cibo preferito",
+      "difficulty": "easy"
+    },
+    {
+      "id": "12",
+      "text": "Ottieni un abbraccio da qualcuno",
+      "difficulty": "medium"
+    },
+    {
+      "id": "13",
+      "text": "Convincere qualcuno a ballare per 10 secondi",
+      "difficulty": "hard"
+    },
+    {
+      "id": "14",
+      "text": "Fai dire a qualcuno il nome della sua città natale",
+      "difficulty": "easy"
+    },
+    {
+      "id": "15",
+      "text": "Convincere qualcuno a raccontare una storia imbarazzante",
+      "difficulty": "hard"
+    },
+    {
+      "id": "16",
+      "text": "Fai dire a qualcuno qual è il suo colore preferito",
+      "difficulty": "easy"
+    },
+    {
+      "id": "17",
+      "text": "Convincere qualcuno a fare una foto insieme",
+      "difficulty": "medium"
+    },
+    {
+      "id": "18",
+      "text": "Fai dire a qualcuno il titolo del suo film preferito",
+      "difficulty": "easy"
+    },
+    {
+      "id": "19",
+      "text": "Convincere qualcuno a fare un'imitazione di una celebrità",
+      "difficulty": "hard"
+    },
+    {
+      "id": "20",
+      "text": "Fai dire a qualcuno qual è il suo hobby preferito",
+      "difficulty": "easy"
+    },
+    {
+      "id": "21",
+      "text": "Convincere qualcuno a raccontare una barzelletta",
+      "difficulty": "medium"
+    },
+    {
+      "id": "22",
+      "text": "Fai dire a qualcuno il nome del suo cantante preferito",
+      "difficulty": "easy"
+    },
+    {
+      "id": "23",
+      "text": "Convincere qualcuno a fare un gioco di parole",
+      "difficulty": "medium"
+    },
+    {
+      "id": "24",
+      "text": "Fai dire a qualcuno qual è la sua stagione preferita",
+      "difficulty": "easy"
+    },
+    {
+      "id": "25",
+      "text": "Convincere qualcuno a raccontare il suo sogno più strano",
+      "difficulty": "hard"
+    }
+  ]
+}
