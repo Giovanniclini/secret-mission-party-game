@@ -1,26 +1,35 @@
 // Game actions for state management
-import { GameState, Player, Mission, GameStatus, MissionState } from '../models';
+import { GameState, Player, Mission, GameStatus, MissionState, GameConfiguration, DifficultyLevel } from '../models';
 
 export enum GameActionType {
   CREATE_GAME = 'CREATE_GAME',
+  CONFIGURE_GAME = 'CONFIGURE_GAME',
   ADD_PLAYER = 'ADD_PLAYER',
   REMOVE_PLAYER = 'REMOVE_PLAYER',
-  ASSIGN_MISSIONS = 'ASSIGN_MISSIONS',
-  UPDATE_MISSION_STATE = 'UPDATE_MISSION_STATE',
+  ASSIGN_MISSION_WITH_DIFFICULTY = 'ASSIGN_MISSION_WITH_DIFFICULTY',
+  COMPLETE_MISSION_WITH_TIMING = 'COMPLETE_MISSION_WITH_TIMING',
+  END_GAME_MANUALLY = 'END_GAME_MANUALLY',
   LOAD_GAME = 'LOAD_GAME',
   UPDATE_GAME_STATUS = 'UPDATE_GAME_STATUS',
-  CLEAR_FINISHED_GAME = 'CLEAR_FINISHED_GAME'
+  CLEAR_FINISHED_GAME = 'CLEAR_FINISHED_GAME',
+  CLEAR_ALL_MISSIONS = 'CLEAR_ALL_MISSIONS'
 }
 
 export interface CreateGameAction {
   type: GameActionType.CREATE_GAME;
 }
 
+export interface ConfigureGameAction {
+  type: GameActionType.CONFIGURE_GAME;
+  payload: {
+    configuration: GameConfiguration;
+  };
+}
+
 export interface AddPlayerAction {
   type: GameActionType.ADD_PLAYER;
   payload: {
     player: Player;
-    mission?: Mission; // Optional mission for players added during active games
   };
 }
 
@@ -31,19 +40,27 @@ export interface RemovePlayerAction {
   };
 }
 
-export interface AssignMissionsAction {
-  type: GameActionType.ASSIGN_MISSIONS;
+export interface AssignMissionWithDifficultyAction {
+  type: GameActionType.ASSIGN_MISSION_WITH_DIFFICULTY;
   payload: {
-    missions: Mission[];
+    playerId: string;
+    mission: Mission;
+    difficulty?: DifficultyLevel; // For mixed mode, player chooses difficulty
   };
 }
 
-export interface UpdateMissionStateAction {
-  type: GameActionType.UPDATE_MISSION_STATE;
+export interface CompleteMissionWithTimingAction {
+  type: GameActionType.COMPLETE_MISSION_WITH_TIMING;
   payload: {
     playerId: string;
-    newState: MissionState;
+    missionId: string;
+    state: MissionState.COMPLETED | MissionState.CAUGHT;
+    completedAt: Date;
   };
+}
+
+export interface EndGameManuallyAction {
+  type: GameActionType.END_GAME_MANUALLY;
 }
 
 export interface LoadGameAction {
@@ -64,24 +81,36 @@ export interface ClearFinishedGameAction {
   type: GameActionType.CLEAR_FINISHED_GAME;
 }
 
+export interface ClearAllMissionsAction {
+  type: GameActionType.CLEAR_ALL_MISSIONS;
+}
+
 export type GameAction = 
   | CreateGameAction
+  | ConfigureGameAction
   | AddPlayerAction
   | RemovePlayerAction
-  | AssignMissionsAction
-  | UpdateMissionStateAction
+  | AssignMissionWithDifficultyAction
+  | CompleteMissionWithTimingAction
+  | EndGameManuallyAction
   | LoadGameAction
   | UpdateGameStatusAction
-  | ClearFinishedGameAction;
+  | ClearFinishedGameAction
+  | ClearAllMissionsAction;
 
 // Action creators
 export const createGame = (): CreateGameAction => ({
   type: GameActionType.CREATE_GAME
 });
 
-export const addPlayer = (player: Player, mission?: Mission): AddPlayerAction => ({
+export const configureGame = (configuration: GameConfiguration): ConfigureGameAction => ({
+  type: GameActionType.CONFIGURE_GAME,
+  payload: { configuration }
+});
+
+export const addPlayer = (player: Player): AddPlayerAction => ({
   type: GameActionType.ADD_PLAYER,
-  payload: { player, mission }
+  payload: { player }
 });
 
 export const removePlayer = (playerId: string): RemovePlayerAction => ({
@@ -89,14 +118,27 @@ export const removePlayer = (playerId: string): RemovePlayerAction => ({
   payload: { playerId }
 });
 
-export const assignMissions = (missions: Mission[]): AssignMissionsAction => ({
-  type: GameActionType.ASSIGN_MISSIONS,
-  payload: { missions }
+export const assignMissionWithDifficulty = (
+  playerId: string, 
+  mission: Mission, 
+  difficulty?: DifficultyLevel
+): AssignMissionWithDifficultyAction => ({
+  type: GameActionType.ASSIGN_MISSION_WITH_DIFFICULTY,
+  payload: { playerId, mission, difficulty }
 });
 
-export const updateMissionState = (playerId: string, newState: MissionState): UpdateMissionStateAction => ({
-  type: GameActionType.UPDATE_MISSION_STATE,
-  payload: { playerId, newState }
+export const completeMissionWithTiming = (
+  playerId: string,
+  missionId: string,
+  state: MissionState.COMPLETED | MissionState.CAUGHT,
+  completedAt: Date = new Date()
+): CompleteMissionWithTimingAction => ({
+  type: GameActionType.COMPLETE_MISSION_WITH_TIMING,
+  payload: { playerId, missionId, state, completedAt }
+});
+
+export const endGameManually = (): EndGameManuallyAction => ({
+  type: GameActionType.END_GAME_MANUALLY
 });
 
 export const loadGame = (gameState: GameState): LoadGameAction => ({
@@ -111,4 +153,8 @@ export const updateGameStatus = (status: GameStatus): UpdateGameStatusAction => 
 
 export const clearFinishedGame = (): ClearFinishedGameAction => ({
   type: GameActionType.CLEAR_FINISHED_GAME
+});
+
+export const clearAllMissions = (): ClearAllMissionsAction => ({
+  type: GameActionType.CLEAR_ALL_MISSIONS
 });

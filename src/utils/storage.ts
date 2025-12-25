@@ -1,6 +1,7 @@
 // AsyncStorage utility functions with error handling and recovery
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { GameState, createInitialGameState, GameStatus, MissionState } from '../models';
+import { GameState, createInitialGameState, GameStatus } from '../models';
+import { validateEnhancedGameState, sanitizePlayerScoring } from './validation';
 
 const STORAGE_KEY = 'secret_mission_game_state';
 const BACKUP_STORAGE_KEY = 'secret_mission_game_state_backup';
@@ -27,28 +28,61 @@ const ERROR_MESSAGES = {
   BACKUP_FAILED: 'Impossibile creare il backup dei dati.'
 };
 
-// Validate game state structure
+// Validate game state structure with enhanced validation
 const isValidGameState = (data: any): data is GameState => {
-  if (!data || typeof data !== 'object') return false;
-  
-  // Check required fields
-  if (!data.id || typeof data.id !== 'string') return false;
-  if (!Array.isArray(data.players)) return false;
-  if (typeof data.targetCompleted !== 'number' || data.targetCompleted < 1) return false;
-  if (!Object.values(GameStatus).includes(data.status)) return false;
-  
-  // Validate dates
-  if (!data.createdAt || !data.updatedAt) return false;
-  
-  // Validate players array
-  for (const player of data.players) {
-    if (!player.id || typeof player.id !== 'string') return false;
-    if (!player.name || typeof player.name !== 'string') return false;
-    if (!Object.values(MissionState).includes(player.missionState)) return false;
-    if (typeof player.completedCount !== 'number' || player.completedCount < 0) return false;
+  const validation = validateEnhancedGameState(data);
+  return validation.isValid;
+};
+
+// Sanitize and repair game state data
+const sanitizeGameState = (data: any): GameState | null => {
+  try {
+    // Basic structure validation first
+    if (!data || typeof data !== 'object') return null;
+    if (!data.id || typeof data.id !== 'string') return null;
+    if (!Array.isArray(data.players)) return null;
+    if (!data.configuration) return null;
+    if (!Object.values(GameStatus).includes(data.status)) return null;
+
+    // Sanitize players with corrected scoring
+    const sanitizedPlayers = data.players.map((player: any) => {
+      if (!player || typeof player !== 'object') return null;
+      if (!player.id || !player.name) return null;
+      if (!Array.isArray(player.missions)) return null;
+
+      // Ensure all required fields exist with defaults
+      const playerWithDefaults = {
+        ...player,
+        totalPoints: typeof player.totalPoints === 'number' ? player.totalPoints : 0,
+        completedMissions: typeof player.completedMissions === 'number' ? player.completedMissions : 0,
+        targetMissionCount: typeof player.targetMissionCount === 'number' ? player.targetMissionCount : 3,
+        missions: player.missions.map((pm: any) => ({
+          ...pm,
+          pointsAwarded: typeof pm.pointsAwarded === 'number' ? pm.pointsAwarded : 0,
+          assignedAt: pm.assignedAt ? new Date(pm.assignedAt) : new Date(),
+          completedAt: pm.completedAt ? new Date(pm.completedAt) : undefined,
+          completionTimeMs: typeof pm.completionTimeMs === 'number' ? pm.completionTimeMs : undefined
+        }))
+      };
+
+      // Apply scoring sanitization
+      return sanitizePlayerScoring(playerWithDefaults);
+    }).filter(Boolean);
+
+    if (sanitizedPlayers.length === 0) return null;
+
+    // Return sanitized game state
+    return {
+      ...data,
+      players: sanitizedPlayers,
+      createdAt: new Date(data.createdAt),
+      updatedAt: new Date(data.updatedAt),
+      endedAt: data.endedAt ? new Date(data.endedAt) : undefined
+    };
+  } catch (error) {
+    console.error('Game state sanitization failed:', error);
+    return null;
   }
-  
-  return true;
 };
 
 // Save game state with backup and retry mechanism
@@ -59,7 +93,7 @@ export const saveGameState = async (gameState: GameState): Promise<StorageResult
     // Try to save main state
     try {
       await AsyncStorage.setItem(STORAGE_KEY, serializedState);
-    } catch (mainError) {
+    } catch {
       // If main save fails, try backup location
       try {
         await AsyncStorage.setItem(BACKUP_STORAGE_KEY, serializedState);
@@ -67,7 +101,7 @@ export const saveGameState = async (gameState: GameState): Promise<StorageResult
           success: true,
           error: 'Salvato nel backup a causa di problemi con la memoria principale.'
         };
-      } catch (backupError) {
+      } catch {
         throw new Error('Entrambi i tentativi di salvataggio sono falliti');
       }
     }
@@ -105,7 +139,7 @@ export const loadGameState = async (): Promise<StorageResult<GameState>> => {
       try {
         rawData = await AsyncStorage.getItem(BACKUP_STORAGE_KEY);
         usingBackup = true;
-      } catch (backupError) {
+      } catch {
         return {
           success: false,
           error: ERROR_MESSAGES.STORAGE_UNAVAILABLE
@@ -138,7 +172,7 @@ export const loadGameState = async (): Promise<StorageResult<GameState>> => {
           } else {
             throw parseError;
           }
-        } catch (backupParseError) {
+        } catch {
           return {
             success: false,
             error: ERROR_MESSAGES.PARSE_ERROR
@@ -156,7 +190,17 @@ export const loadGameState = async (): Promise<StorageResult<GameState>> => {
     if (!isValidGameState(parsedData)) {
       console.error('Invalid game state structure:', parsedData);
       
-      // Try backup if main data is corrupted
+      // Try to sanitize the data first
+      const sanitizedData = sanitizeGameState(parsedData);
+      if (sanitizedData) {
+        return {
+          success: true,
+          data: sanitizedData,
+          error: 'Dati del gioco riparati automaticamente.'
+        };
+      }
+      
+      // Try backup if main data is corrupted and sanitization failed
       if (!usingBackup) {
         try {
           const backupData = await AsyncStorage.getItem(BACKUP_STORAGE_KEY);
@@ -168,10 +212,21 @@ export const loadGameState = async (): Promise<StorageResult<GameState>> => {
                 data: {
                   ...backupParsed,
                   createdAt: new Date(backupParsed.createdAt),
-                  updatedAt: new Date(backupParsed.updatedAt)
+                  updatedAt: new Date(backupParsed.updatedAt),
+                  endedAt: backupParsed.endedAt ? new Date(backupParsed.endedAt) : undefined
                 },
                 error: ERROR_MESSAGES.RECOVERY_SUCCESS
               };
+            } else {
+              // Try to sanitize backup data
+              const sanitizedBackup = sanitizeGameState(backupParsed);
+              if (sanitizedBackup) {
+                return {
+                  success: true,
+                  data: sanitizedBackup,
+                  error: 'Dati recuperati e riparati dal backup.'
+                };
+              }
             }
           }
         } catch (backupError) {
@@ -189,7 +244,8 @@ export const loadGameState = async (): Promise<StorageResult<GameState>> => {
     const gameState: GameState = {
       ...parsedData,
       createdAt: new Date(parsedData.createdAt),
-      updatedAt: new Date(parsedData.updatedAt)
+      updatedAt: new Date(parsedData.updatedAt),
+      endedAt: parsedData.endedAt ? new Date(parsedData.endedAt) : undefined
     };
     
     return {

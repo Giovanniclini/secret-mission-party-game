@@ -8,7 +8,7 @@ import {
   KeyboardAvoidingView,
   Platform
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { useGameContext, useGameActions } from '../store/GameContext';
 import { createPlayer, GameStatus } from '../models';
 import { validatePlayerName, validateGameStart } from '../utils/validation';
@@ -29,12 +29,22 @@ const SetupPlayersScreen: React.FC = () => {
   const [playerName, setPlayerName] = useState('');
   const [inputError, setInputError] = useState<string>('');
 
-  // Ensure game status is SETUP when this screen is active
+  // Update game status to CONFIGURING when this screen is active (only once)
   useEffect(() => {
-    if (gameState.status !== GameStatus.SETUP) {
-      updateGameStatus(GameStatus.SETUP);
+    if (gameState.status === GameStatus.SETUP) {
+      // Coming from GameConfigurationScreen, transition to CONFIGURING
+      updateGameStatus(GameStatus.CONFIGURING);
     }
-  }, [gameState.status, updateGameStatus]);
+  }, []); // Empty dependency array - only run once on mount
+
+  // Reset status to CONFIGURING when this screen gains focus (coming back from assign-missions)
+  useFocusEffect(
+    React.useCallback(() => {
+      if (gameState.status === GameStatus.ASSIGNING) {
+        updateGameStatus(GameStatus.CONFIGURING);
+      }
+    }, [gameState.status, updateGameStatus])
+  );
 
   const handleAddPlayer = async () => {
     const trimmedName = playerName.trim();
@@ -51,7 +61,7 @@ const SetupPlayersScreen: React.FC = () => {
     
     // Add player with error handling
     await handleAsyncError(async () => {
-      const newPlayer = createPlayer(trimmedName);
+      const newPlayer = createPlayer(trimmedName, gameState.configuration.missionsPerPlayer);
       addPlayer(newPlayer);
       setPlayerName('');
       setInputError('');
@@ -92,6 +102,8 @@ const SetupPlayersScreen: React.FC = () => {
     
     // Navigate to AssignMissionsScreen with error handling
     await handleAsyncError(async () => {
+      // Update status to ASSIGNING before navigation
+      updateGameStatus(GameStatus.ASSIGNING);
       router.push('/assign-missions');
     }, 'Errore durante l\'avvio della partita.');
   };
@@ -140,13 +152,13 @@ const SetupPlayersScreen: React.FC = () => {
           color: theme.colors.secondary,
           ...theme.typography.title1 
         }]}>
-          Configurazione Giocatori
+          Aggiungi Giocatori
         </Text>
         <Text style={[styles.subtitle, { 
           color: theme.colors.textSecondary,
           ...theme.typography.callout 
         }]}>
-          Aggiungi i giocatori per iniziare la partita
+          Aggiungi i giocatori per iniziare la partita ({gameState.configuration.missionsPerPlayer} {gameState.configuration.missionsPerPlayer === 1 ? 'missione' : 'missioni'} per giocatore)
         </Text>
         
         <View style={styles.inputSection}>

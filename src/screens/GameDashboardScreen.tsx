@@ -1,136 +1,34 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { 
   View, 
   Text, 
   StyleSheet, 
   TouchableOpacity, 
   FlatList, 
-  Alert,
   SafeAreaView,
-  Modal 
+  ScrollView
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useGameContext, useGameActions } from '../store/GameContext';
-import { GameStatus, MissionState, getWinner, createPlayer } from '../models';
-import { useTheme } from '../theme/ThemeProvider';
+import { GameStatus, MissionState, Player } from '../models';
+import { useTheme } from '../theme';
 import { StatusIndicator, StatusType } from '../components/ui/StatusIndicator';
-import { Button } from '../components/ui/Button';
-import { Input } from '../components/ui/Input';
-import { validatePlayerName } from '../utils/validation';
-import { getAllMissions } from '../data/missions';
 
 const GameDashboardScreen: React.FC = () => {
   const router = useRouter();
-  const theme = useTheme();
   const { gameState } = useGameContext();
-  const { updateGameStatus, addPlayer, removePlayer } = useGameActions();
-  const [showAddPlayerModal, setShowAddPlayerModal] = useState(false);
-  const [newPlayerName, setNewPlayerName] = useState('');
-  const [inputError, setInputError] = useState('');
+  const { updateGameStatus } = useGameActions();
+  const theme = useTheme();
 
-  // Check if there's a winner
-  const winner = getWinner(gameState.players, gameState.targetCompleted);
+  const styles = createStyles(theme);
 
   const handleMyTurn = () => {
     router.push('/my-turn' as any);
   };
 
   const handleEndGame = () => {
-    Alert.alert(
-      'Termina Partita',
-      'Sei sicuro di voler terminare la partita? Questo porterà alla schermata finale.',
-      [
-        {
-          text: 'Annulla',
-          style: 'cancel',
-        },
-        {
-          text: 'Termina',
-          style: 'destructive',
-          onPress: () => {
-            updateGameStatus(GameStatus.FINISHED);
-            router.push('/end-game' as any);
-          },
-        },
-      ]
-    );
-  };
-
-  const handleAddPlayer = () => {
-    const trimmedName = newPlayerName.trim();
-    
-    // Validate player name
-    const validation = validatePlayerName(trimmedName, gameState.players);
-    if (!validation.isValid) {
-      setInputError(validation.error || 'Nome non valido');
-      return;
-    }
-    
-    // Create new player
-    const newPlayer = createPlayer(trimmedName);
-    
-    // If game is in progress, assign a random mission
-    let missionToAssign = undefined;
-    if (gameState.status === GameStatus.IN_PROGRESS) {
-      const allMissions = getAllMissions();
-      if (allMissions.length > 0) {
-        // Get a random mission
-        const randomIndex = Math.floor(Math.random() * allMissions.length);
-        missionToAssign = allMissions[randomIndex];
-      }
-    }
-    
-    // Add player with optional mission
-    addPlayer(newPlayer, missionToAssign);
-    
-    // Reset form and close modal
-    setNewPlayerName('');
-    setInputError('');
-    setShowAddPlayerModal(false);
-  };
-
-  const handleRemovePlayer = (playerId: string) => {
-    const player = gameState.players.find(p => p.id === playerId);
-    if (!player) return;
-
-    // Prevent removing players if it would go below minimum
-    if (gameState.players.length <= 3) {
-      Alert.alert(
-        'Impossibile Rimuovere',
-        'Servono almeno 3 giocatori per continuare la partita.'
-      );
-      return;
-    }
-
-    Alert.alert(
-      'Rimuovi Giocatore',
-      `Sei sicuro di voler rimuovere ${player.name}? Perderà tutti i progressi.`,
-      [
-        {
-          text: 'Annulla',
-          style: 'cancel',
-        },
-        {
-          text: 'Rimuovi',
-          style: 'destructive',
-          onPress: () => {
-            removePlayer(playerId);
-          },
-        },
-      ]
-    );
-  };
-
-  const openAddPlayerModal = () => {
-    setNewPlayerName('');
-    setInputError('');
-    setShowAddPlayerModal(true);
-  };
-
-  const closeAddPlayerModal = () => {
-    setNewPlayerName('');
-    setInputError('');
-    setShowAddPlayerModal(false);
+    updateGameStatus(GameStatus.FINISHED);
+    router.push('/end-game' as any);
   };
 
   const getMissionStateStatus = (state: MissionState): StatusType => {
@@ -148,60 +46,121 @@ const GameDashboardScreen: React.FC = () => {
     }
   };
 
-  const getGameProgress = () => {
+  const calculateAverageCompletionTime = (player: Player): number => {
+    const completedMissions = player.missions.filter(
+      pm => pm.state === MissionState.COMPLETED && pm.completionTimeMs !== undefined
+    );
+    
+    if (completedMissions.length === 0) {
+      return 0;
+    }
+    
+    const totalTime = completedMissions.reduce(
+      (sum, pm) => sum + (pm.completionTimeMs || 0),
+      0
+    );
+    
+    return totalTime / completedMissions.length;
+  };
+
+  const formatTime = (timeMs: number): string => {
+    if (timeMs === 0) return '--';
+    const seconds = Math.floor(timeMs / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
+
+  const getOverallGameProgress = () => {
     const totalPlayers = gameState.players.length;
-    const playersWithCompletedMissions = gameState.players.filter(
-      player => player.completedCount >= gameState.targetCompleted
-    ).length;
+    const totalMissionsNeeded = totalPlayers * gameState.configuration.missionsPerPlayer;
+    const totalMissionsCompleted = gameState.players.reduce(
+      (sum, player) => sum + player.completedMissions, 0
+    );
     
     return {
       totalPlayers,
-      playersWithCompletedMissions,
-      percentage: totalPlayers > 0 ? (playersWithCompletedMissions / totalPlayers) * 100 : 0
+      totalMissionsNeeded,
+      totalMissionsCompleted,
+      percentage: totalMissionsNeeded > 0 ? (totalMissionsCompleted / totalMissionsNeeded) * 100 : 0
     };
   };
 
-  const progress = getGameProgress();
+  const getSortedPlayersByRanking = (): Player[] => {
+    return [...gameState.players].sort((a, b) => {
+      // Primary: highest total points
+      if (a.totalPoints !== b.totalPoints) {
+        return b.totalPoints - a.totalPoints;
+      }
+      
+      // Tiebreaker: fastest average completion time
+      const avgTimeA = calculateAverageCompletionTime(a);
+      const avgTimeB = calculateAverageCompletionTime(b);
+      
+      if (avgTimeA === 0 && avgTimeB === 0) return 0;
+      if (avgTimeA === 0) return 1; // Players with no completed missions rank lower
+      if (avgTimeB === 0) return -1;
+      
+      return avgTimeA - avgTimeB;
+    });
+  };
 
-  const renderPlayerItem = ({ item: player }: { item: typeof gameState.players[0] }) => (
-    <View style={[styles.playerCard, { backgroundColor: theme.colors.backgroundPrimary }]}>
-      <View style={styles.playerHeader}>
-        <View style={styles.playerInfo}>
-          <Text style={[styles.playerName, { color: theme.colors.textPrimary }]}>
-            {player.name}
-          </Text>
-          {winner && winner.id === player.id && (
-            <View style={[styles.winnerBadge, { backgroundColor: theme.colors.primary }]}>
-              <Text style={styles.winnerText}>Vincitore</Text>
+  const progress = getOverallGameProgress();
+  const rankedPlayers = getSortedPlayersByRanking();
+
+  const renderPlayerCard = ({ item: player, index }: { item: Player; index: number }) => {
+    const remainingMissions = Math.max(0, player.targetMissionCount - player.completedMissions);
+    const avgCompletionTime = calculateAverageCompletionTime(player);
+    const currentMission = player.missions.find(pm => pm.state === MissionState.ACTIVE);
+    
+    return (
+      <View style={styles.playerCard}>
+        <View style={styles.playerHeader}>
+          <View style={styles.playerRankAndName}>
+            <View style={[styles.rankBadge, { backgroundColor: index === 0 ? theme.colors.primary : theme.colors.textSecondary }]}>
+              <Text style={styles.rankText}>{index + 1}</Text>
             </View>
-          )}
+            <Text style={styles.playerName}>{player.name}</Text>
+          </View>
+          <Text style={styles.playerPoints}>{player.totalPoints} pt</Text>
         </View>
         
-        <Button
-          title="Rimuovi"
-          onPress={() => handleRemovePlayer(player.id)}
-          variant="destructive"
-          size="small"
-        />
-      </View>
-      
-      <View style={styles.playerStats}>
-        <StatusIndicator 
-          status={getMissionStateStatus(player.missionState)}
-          size="medium"
-          showLabel={true}
-        />
+        <View style={styles.playerProgress}>
+          <View style={styles.progressRow}>
+            <Text style={styles.progressLabel}>Missioni completate:</Text>
+            <Text style={styles.progressValue}>
+              {player.completedMissions}/{player.targetMissionCount}
+            </Text>
+          </View>
+          
+          <View style={styles.progressRow}>
+            <Text style={styles.progressLabel}>Missioni rimanenti:</Text>
+            <Text style={styles.progressValue}>{remainingMissions}</Text>
+          </View>
+          
+          <View style={styles.progressRow}>
+            <Text style={styles.progressLabel}>Tempo medio:</Text>
+            <Text style={styles.progressValue}>{formatTime(avgCompletionTime)}</Text>
+          </View>
+        </View>
         
-        <Text style={[styles.completedCount, { color: theme.colors.textSecondary }]}>
-          {player.completedCount}/{gameState.targetCompleted} completate
-        </Text>
+        {currentMission && (
+          <View style={styles.currentMissionStatus}>
+            <StatusIndicator 
+              status={getMissionStateStatus(currentMission.state)}
+              size="small"
+              showLabel={true}
+            />
+            <Text style={styles.currentMissionText}>Missione in corso</Text>
+          </View>
+        )}
       </View>
-    </View>
-  );
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>Dashboard di Gioco</Text>
@@ -210,54 +169,45 @@ const GameDashboardScreen: React.FC = () => {
           </Text>
         </View>
 
-        {/* Game Progress */}
-        <View style={styles.progressCard}>
-          <Text style={styles.progressTitle}>Progresso Partita</Text>
-          <View style={styles.progressStats}>
-            <View style={styles.progressItem}>
-              <Text style={styles.progressNumber}>{gameState.players.length}</Text>
-              <Text style={styles.progressLabel}>Giocatori</Text>
+        {/* Overall Game Progress */}
+        <View style={styles.overallProgressCard}>
+          <Text style={styles.cardTitle}>Progresso Generale</Text>
+          
+          <View style={styles.progressStatsRow}>
+            <View style={styles.progressStat}>
+              <Text style={styles.progressStatNumber}>{progress.totalMissionsCompleted}</Text>
+              <Text style={styles.progressStatLabel}>Completate</Text>
             </View>
-            <View style={styles.progressItem}>
-              <Text style={styles.progressNumber}>{progress.playersWithCompletedMissions}</Text>
-              <Text style={styles.progressLabel}>Hanno Vinto</Text>
+            <View style={styles.progressStat}>
+              <Text style={styles.progressStatNumber}>{progress.totalMissionsNeeded}</Text>
+              <Text style={styles.progressStatLabel}>Totali</Text>
             </View>
-            <View style={styles.progressItem}>
-              <Text style={styles.progressNumber}>{gameState.targetCompleted}</Text>
-              <Text style={styles.progressLabel}>Obiettivo</Text>
+            <View style={styles.progressStat}>
+              <Text style={styles.progressStatNumber}>{Math.round(progress.percentage)}%</Text>
+              <Text style={styles.progressStatLabel}>Completamento</Text>
             </View>
           </View>
           
-          {winner && (
-            <View style={styles.winnerAlert}>
-              <Text style={styles.winnerAlertText}>
-                🎉 {winner.name} ha vinto la partita!
-              </Text>
-            </View>
-          )}
-        </View>
-
-        {/* Players List */}
-        <View style={styles.playersSection}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>
-              Giocatori ({gameState.players.length})
-            </Text>
-            <Button
-              title="Aggiungi"
-              onPress={openAddPlayerModal}
-              variant="secondary"
-              size="small"
+          <View style={styles.progressBar}>
+            <View 
+              style={[
+                styles.progressBarFill, 
+                { width: `${Math.min(100, progress.percentage)}%` }
+              ]} 
             />
           </View>
+        </View>
+
+        {/* Current Leaderboard */}
+        <View style={styles.leaderboardCard}>
+          <Text style={styles.cardTitle}>Classifica Attuale</Text>
           
           <FlatList
-            data={gameState.players}
-            renderItem={renderPlayerItem}
+            data={rankedPlayers}
+            renderItem={renderPlayerCard}
             keyExtractor={(item) => item.id}
-            style={styles.playersList}
+            scrollEnabled={false}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.playersListContent}
           />
         </View>
 
@@ -266,281 +216,211 @@ const GameDashboardScreen: React.FC = () => {
           <TouchableOpacity
             style={styles.myTurnButton}
             onPress={handleMyTurn}
+            activeOpacity={0.8}
           >
-            <Text style={styles.myTurnButtonText}>Vedi o aggiorna status missione</Text>
+            <Text style={styles.myTurnButtonText}>Vedi o aggiorna status missioni</Text>
           </TouchableOpacity>
           
           <TouchableOpacity
             style={styles.endGameButton}
             onPress={handleEndGame}
+            activeOpacity={0.8}
           >
             <Text style={styles.endGameButtonText}>Termina Partita</Text>
           </TouchableOpacity>
         </View>
-      </View>
-
-      {/* Add Player Modal */}
-      <Modal
-        visible={showAddPlayerModal}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={closeAddPlayerModal}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: theme.colors.backgroundPrimary }]}>
-            <Text style={[styles.modalTitle, { color: theme.colors.secondary }]}>
-              Aggiungi Giocatore
-            </Text>
-            
-            <Input
-              placeholder="Nome giocatore"
-              value={newPlayerName}
-              onChangeText={setNewPlayerName}
-              error={inputError}
-              containerStyle={styles.modalInput}
-            />
-            
-            <View style={styles.modalActions}>
-              <Button
-                title="Annulla"
-                onPress={closeAddPlayerModal}
-                variant="secondary"
-                size="medium"
-                style={styles.modalButton}
-              />
-              <Button
-                title="Aggiungi"
-                onPress={handleAddPlayer}
-                variant="primary"
-                size="medium"
-                style={styles.modalButton}
-              />
-            </View>
-          </View>
-        </View>
-      </Modal>
+      </ScrollView>
     </SafeAreaView>
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: theme.colors.backgroundSecondary,
   },
-  content: {
+  scrollView: {
     flex: 1,
-    padding: 20,
   },
   header: {
     alignItems: 'center',
-    marginBottom: 24,
+    paddingHorizontal: theme.spacing.lg,
+    paddingTop: theme.spacing.lg,
+    paddingBottom: theme.spacing.xl,
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#2c3e50',
+    ...theme.typography.title1,
+    color: theme.colors.secondary,
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: theme.spacing.sm,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#7f8c8d',
+    ...theme.typography.body,
+    color: theme.colors.textSecondary,
     textAlign: 'center',
   },
-  progressCard: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 20,
-    marginBottom: 24,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+  
+  // Overall Progress Card
+  overallProgressCard: {
+    backgroundColor: theme.colors.backgroundPrimary,
+    marginHorizontal: theme.spacing.lg,
+    marginBottom: theme.spacing.lg,
+    borderRadius: theme.borderRadius.medium,
+    padding: theme.spacing.lg,
+    ...theme.shadows.medium,
   },
-  progressTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#2c3e50',
+  cardTitle: {
+    ...theme.typography.headline,
+    color: theme.colors.secondary,
     textAlign: 'center',
-    marginBottom: 16,
+    marginBottom: theme.spacing.lg,
   },
-  progressStats: {
+  progressStatsRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginBottom: 16,
+    marginBottom: theme.spacing.lg,
   },
-  progressItem: {
+  progressStat: {
     alignItems: 'center',
   },
-  progressNumber: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#3498db',
-    marginBottom: 4,
+  progressStatNumber: {
+    ...theme.typography.title2,
+    color: theme.colors.accent,
+    marginBottom: theme.spacing.xs,
   },
-  progressLabel: {
-    fontSize: 14,
-    color: '#7f8c8d',
+  progressStatLabel: {
+    ...theme.typography.caption,
+    color: theme.colors.textSecondary,
     textAlign: 'center',
   },
-  winnerAlert: {
-    backgroundColor: '#d5f4e6',
-    borderRadius: 8,
-    padding: 12,
-    borderLeftWidth: 4,
-    borderLeftColor: '#27ae60',
+  progressBar: {
+    height: 8,
+    backgroundColor: theme.colors.backgroundSecondary,
+    borderRadius: 4,
+    overflow: 'hidden',
   },
-  winnerAlertText: {
-    fontSize: 16,
-    color: '#27ae60',
-    fontWeight: '600',
-    textAlign: 'center',
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: theme.colors.accent,
+    borderRadius: 4,
   },
-  playersSection: {
-    flex: 1,
-    marginBottom: 20,
+  
+  // Leaderboard Card
+  leaderboardCard: {
+    backgroundColor: theme.colors.backgroundPrimary,
+    marginHorizontal: theme.spacing.lg,
+    marginBottom: theme.spacing.lg,
+    borderRadius: theme.borderRadius.medium,
+    padding: theme.spacing.lg,
+    ...theme.shadows.medium,
   },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#2c3e50',
-    marginBottom: 16,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  playersList: {
-    flex: 1,
-  },
-  playersListContent: {
-    paddingBottom: 16,
-  },
+  
+  // Player Cards
   playerCard: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    backgroundColor: theme.colors.backgroundSecondary,
+    borderRadius: theme.borderRadius.small,
+    padding: theme.spacing.md,
+    marginBottom: theme.spacing.md,
   },
   playerHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: theme.spacing.md,
   },
-  playerInfo: {
-    flex: 1,
+  playerRankAndName: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-  },
-  playerName: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#2c3e50',
     flex: 1,
   },
-  winnerBadge: {
-    backgroundColor: '#f39c12',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
+  rankBadge: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: theme.spacing.md,
   },
-  winnerText: {
-    fontSize: 12,
-    color: 'white',
-    fontWeight: '600',
+  rankText: {
+    ...theme.typography.footnote,
+    color: theme.colors.backgroundPrimary,
+    fontWeight: 'bold',
   },
-  playerStats: {
+  playerName: {
+    ...theme.typography.headline,
+    color: theme.colors.textPrimary,
+    flex: 1,
+  },
+  playerPoints: {
+    ...theme.typography.headline,
+    color: theme.colors.primary,
+    fontWeight: 'bold',
+  },
+  
+  // Player Progress
+  playerProgress: {
+    marginBottom: theme.spacing.md,
+  },
+  progressRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: theme.spacing.xs,
   },
-  completedCount: {
-    fontSize: 14,
-    color: '#7f8c8d',
+  progressLabel: {
+    ...theme.typography.subhead,
+    color: theme.colors.textSecondary,
   },
-  actionButtons: {
-    gap: 12,
-  },
-  myTurnButton: {
-    backgroundColor: '#3498db',
-    paddingVertical: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  myTurnButtonText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  endGameButton: {
-    backgroundColor: 'transparent',
-    paddingVertical: 12,
-    borderRadius: 8,
-    borderWidth: 2,
-    borderColor: '#e74c3c',
-    alignItems: 'center',
-  },
-  endGameButtonText: {
-    color: '#e74c3c',
-    fontSize: 16,
+  progressValue: {
+    ...theme.typography.subhead,
+    color: theme.colors.textPrimary,
     fontWeight: '600',
   },
   
-  // Modal styles
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  modalContent: {
-    borderRadius: 16,
-    padding: 24,
-    width: '100%',
-    maxWidth: 400,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  modalInput: {
-    marginBottom: 24, // Increased spacing between input and buttons
-  },
-  modalActions: {
+  // Current Mission Status
+  currentMissionStatus: {
     flexDirection: 'row',
-    gap: 16, // Increased gap between buttons
-    marginTop: 8, // Added top margin for more spacing
+    alignItems: 'center',
+    paddingTop: theme.spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.backgroundSecondary,
   },
-  modalButton: {
-    flex: 1,
+  currentMissionText: {
+    ...theme.typography.caption,
+    color: theme.colors.textSecondary,
+    marginLeft: theme.spacing.sm,
+  },
+  
+  // Action Buttons
+  actionButtons: {
+    paddingHorizontal: theme.spacing.lg,
+    paddingBottom: theme.spacing.xl,
+    gap: theme.spacing.md,
+  },
+  myTurnButton: {
+    backgroundColor: theme.colors.primary,
+    paddingVertical: theme.spacing.lg,
+    borderRadius: theme.borderRadius.small,
+    alignItems: 'center',
+    ...theme.shadows.small,
+  },
+  myTurnButtonText: {
+    ...theme.typography.headline,
+    color: theme.colors.backgroundPrimary,
+    fontWeight: 'bold',
+  },
+  endGameButton: {
+    backgroundColor: 'transparent',
+    paddingVertical: theme.spacing.md,
+    borderRadius: theme.borderRadius.small,
+    borderWidth: 2,
+    borderColor: theme.colors.error,
+    alignItems: 'center',
+  },
+  endGameButtonText: {
+    ...theme.typography.callout,
+    color: theme.colors.error,
+    fontWeight: '600',
   },
 });
 

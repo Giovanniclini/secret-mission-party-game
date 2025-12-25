@@ -4,12 +4,15 @@ import { useRouter } from 'expo-router';
 import { useGameContext } from '@/src/store/GameContext';
 import { GameStatus } from '@/src/models';
 import GameDashboardScreen from '@/src/screens/GameDashboardScreen';
-import { Colors, Typography, Spacing } from '@/src/theme/constants';
+import { useTheme } from '@/src/theme';
 import { Button } from '@/src/components/ui/Button';
 
 export default function CurrentGameTab() {
   const { gameState } = useGameContext();
   const router = useRouter();
+  const theme = useTheme();
+
+  const styles = createStyles(theme);
 
   // If no active game, show message to start one
   if (gameState.status === GameStatus.SETUP) {
@@ -33,25 +36,25 @@ export default function CurrentGameTab() {
   return <GameDashboardScreen />;
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   noGameContainer: {
     flex: 1,
-    backgroundColor: Colors.backgroundSecondary,
+    backgroundColor: theme.colors.backgroundSecondary,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: Spacing.xl,
+    padding: theme.spacing.xl,
   },
   noGameTitle: {
-    ...Typography.title1,
-    color: Colors.secondary,
+    ...theme.typography.title1,
+    color: theme.colors.secondary,
     textAlign: 'center',
-    marginBottom: Spacing.md,
+    marginBottom: theme.spacing.md,
   },
   noGameSubtitle: {
-    ...Typography.body,
-    color: Colors.textSecondary,
+    ...theme.typography.body,
+    color: theme.colors.textSecondary,
     textAlign: 'center',
-    marginBottom: Spacing.xl,
+    marginBottom: theme.spacing.xl,
   },
   homeButton: {
     minWidth: 200,

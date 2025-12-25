@@ -7,7 +7,7 @@ import {
   Platform
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { Colors, Typography, Spacing, BorderRadius } from '../theme/constants';
+import { useTheme } from '../theme';
 
 interface SecureRevealProps {
   missionText: string;
@@ -24,6 +24,7 @@ const SecureReveal: React.FC<SecureRevealProps> = ({
   onRevealEnd,
   hapticFeedback = true,
 }) => {
+  const theme = useTheme();
   const [isRevealed, setIsRevealed] = useState(false);
 
   const handlePressIn = useCallback(() => {
@@ -45,6 +46,8 @@ const SecureReveal: React.FC<SecureRevealProps> = ({
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
   }, [onRevealEnd, hapticFeedback]);
+
+  const styles = createStyles(theme);
 
   return (
     <View style={styles.container}>
@@ -97,23 +100,23 @@ const SecureReveal: React.FC<SecureRevealProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.backgroundPrimary,
-    padding: Spacing.lg,
+    backgroundColor: theme.colors.backgroundPrimary,
+    padding: theme.spacing.lg,
     justifyContent: 'center',
   },
   revealArea: {
-    backgroundColor: Colors.backgroundPrimary,
-    borderRadius: BorderRadius.large,
-    padding: Spacing.xl,
-    marginBottom: Spacing.xxl, // Increased spacing
+    backgroundColor: theme.colors.backgroundPrimary,
+    borderRadius: theme.borderRadius.large,
+    padding: theme.spacing.xl,
+    marginBottom: theme.spacing.xxl, // Increased spacing
     minHeight: 120,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: Colors.backgroundSecondary,
+    borderColor: theme.colors.backgroundSecondary,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -128,32 +131,32 @@ const styles = StyleSheet.create({
   },
   placeholder: {
     fontSize: 24,
-    color: Colors.textSecondary,
+    color: theme.colors.textSecondary,
     letterSpacing: 4,
-    marginBottom: Spacing.md,
+    marginBottom: theme.spacing.md,
   },
   helperText: {
-    ...Typography.callout,
-    color: Colors.textSecondary,
+    ...theme.typography.callout,
+    color: theme.colors.textSecondary,
     textAlign: 'center',
   },
   revealedState: {
     alignItems: 'center',
   },
   missionText: {
-    ...Typography.body,
-    color: Colors.textPrimary,
+    ...theme.typography.body,
+    color: theme.colors.textPrimary,
     textAlign: 'center',
     lineHeight: 24,
     fontWeight: '500',
   },
   revealButton: {
-    backgroundColor: Colors.primary,
-    paddingVertical: Spacing.lg,
-    paddingHorizontal: Spacing.xl,
-    borderRadius: BorderRadius.medium,
+    backgroundColor: theme.colors.primary,
+    paddingVertical: theme.spacing.lg,
+    paddingHorizontal: theme.spacing.xl,
+    borderRadius: theme.borderRadius.medium,
     alignItems: 'center',
-    marginBottom: Spacing.xxl, // Increased spacing between button and instructions
+    marginBottom: theme.spacing.lg, // Reduced spacing between button and instructions
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -168,26 +171,26 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
   },
   revealButtonActive: {
-    backgroundColor: Colors.accent,
+    backgroundColor: theme.colors.accent,
   },
   revealButtonText: {
-    ...Typography.headline,
-    color: Colors.backgroundPrimary,
+    ...theme.typography.headline,
+    color: theme.colors.backgroundPrimary,
     textAlign: 'center',
     fontWeight: '600',
   },
   revealButtonTextActive: {
-    color: Colors.backgroundPrimary,
+    color: theme.colors.backgroundPrimary,
   },
   instructions: {
-    backgroundColor: Colors.backgroundSecondary,
-    borderRadius: BorderRadius.medium,
-    padding: Spacing.md,
+    backgroundColor: theme.colors.backgroundSecondary,
+    borderRadius: theme.borderRadius.medium,
+    padding: theme.spacing.md,
   },
   instructionText: {
-    ...Typography.footnote,
-    color: Colors.textSecondary,
-    marginBottom: Spacing.xs,
+    ...theme.typography.footnote,
+    color: theme.colors.textSecondary,
+    marginBottom: theme.spacing.xs,
     lineHeight: 18,
   },
 });

@@ -6,6 +6,7 @@ import {
   TouchableOpacity 
 } from 'react-native';
 import { Mission } from '../models';
+import { useTheme } from '../theme';
 
 interface MissionCardProps {
   mission: Mission;
@@ -18,16 +19,19 @@ const MissionCard: React.FC<MissionCardProps> = ({
   playerName, 
   onContinue 
 }) => {
+  const theme = useTheme();
+  const styles = createStyles(theme);
+  
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case 'easy':
-        return '#27ae60';
+        return theme.colors.missionCompleted;
       case 'medium':
-        return '#f39c12';
+        return theme.colors.primary;
       case 'hard':
-        return '#e74c3c';
+        return theme.colors.missionCaught;
       default:
-        return '#7f8c8d';
+        return theme.colors.textSecondary;
     }
   };
 
@@ -85,13 +89,13 @@ const MissionCard: React.FC<MissionCardProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: theme.colors.backgroundSecondary,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: theme.spacing.md,
   },
   content: {
     alignItems: 'center',
@@ -99,71 +103,62 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#2c3e50',
-    marginBottom: 16,
+    ...theme.typography.title2,
+    color: theme.colors.secondary,
+    marginBottom: theme.spacing.lg,
     textAlign: 'center',
   },
   playerName: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#3498db',
-    marginBottom: 32,
+    ...theme.typography.title1,
+    color: theme.colors.primary,
+    marginBottom: theme.spacing.xl,
     textAlign: 'center',
   },
   missionCard: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 24,
-    marginBottom: 32,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+    backgroundColor: theme.colors.backgroundPrimary,
+    borderRadius: theme.borderRadius.medium,
+    padding: theme.spacing.lg,
+    marginBottom: theme.spacing.xl,
+    ...theme.shadows.medium,
     width: '100%',
   },
   difficultyBadge: {
     alignSelf: 'flex-start',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    marginBottom: 16,
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.xs,
+    borderRadius: theme.borderRadius.large,
+    marginBottom: theme.spacing.lg,
   },
   difficultyText: {
-    color: 'white',
-    fontSize: 12,
+    ...theme.typography.caption,
+    color: theme.colors.backgroundPrimary,
     fontWeight: '600',
     textTransform: 'uppercase',
   },
   missionText: {
-    fontSize: 18,
-    color: '#2c3e50',
+    ...theme.typography.body,
+    color: theme.colors.textPrimary,
     textAlign: 'center',
     lineHeight: 26,
     fontWeight: '500',
   },
   instruction: {
-    fontSize: 16,
-    color: '#7f8c8d',
+    ...theme.typography.callout,
+    color: theme.colors.textSecondary,
     textAlign: 'center',
-    marginBottom: 32,
+    marginBottom: theme.spacing.xl,
     lineHeight: 22,
   },
   continueButton: {
-    backgroundColor: '#3498db',
-    paddingHorizontal: 32,
-    paddingVertical: 16,
-    borderRadius: 8,
+    backgroundColor: theme.colors.primary,
+    paddingHorizontal: theme.spacing.xl,
+    paddingVertical: theme.spacing.lg,
+    borderRadius: theme.borderRadius.small,
     minWidth: 200,
   },
   continueButtonText: {
-    color: 'white',
-    fontSize: 18,
+    ...theme.typography.headline,
+    color: theme.colors.backgroundPrimary,
     fontWeight: '600',
     textAlign: 'center',
   },

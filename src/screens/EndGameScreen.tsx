@@ -9,25 +9,105 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useGameContext, useGameActions } from '../store/GameContext';
-import { MissionState, getWinner } from '../models';
+import { 
+  MissionState, 
+  determineWinner, 
+  calculateAverageCompletionTime,
+  DifficultyLevel 
+} from '../models';
 import { Button } from '../components/ui/Button';
-import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../theme/constants';
+import { useTheme } from '../theme';
 
 const EndGameScreen: React.FC = () => {
   const router = useRouter();
   const { gameState } = useGameContext();
   const { createGame } = useGameActions();
+  const theme = useTheme();
 
-  // Get winner and game statistics
-  const winner = getWinner(gameState.players, gameState.targetCompleted);
+  const styles = createStyles(theme);
+
+  // Get winner using the new multi-mission scoring system
+  const winner = determineWinner(gameState.players);
   
+  // Calculate comprehensive game statistics
   const gameStats = {
     totalPlayers: gameState.players.length,
-    completedMissions: gameState.players.reduce((sum, player) => sum + player.completedCount, 0),
-    caughtMissions: gameState.players.filter(player => player.missionState === MissionState.CAUGHT).length,
-    activeMissions: gameState.players.filter(player => player.missionState === MissionState.ACTIVE).length,
-    gameDuration: gameState.createdAt ? 
-      Math.round((new Date().getTime() - new Date(gameState.createdAt).getTime()) / (1000 * 60)) : 0
+    totalMissionsAssigned: gameState.players.reduce((sum, player) => sum + player.missions.length, 0),
+    totalMissionsCompleted: gameState.players.reduce((sum, player) => sum + player.completedMissions, 0),
+    totalPointsAwarded: gameState.players.reduce((sum, player) => sum + player.totalPoints, 0),
+    gameDurationMs: gameState.endedAt && gameState.createdAt ? 
+      new Date(gameState.endedAt).getTime() - new Date(gameState.createdAt).getTime() : 
+      Date.now() - new Date(gameState.createdAt).getTime(),
+    averagePointsPerPlayer: gameState.players.length > 0 ? 
+      gameState.players.reduce((sum, player) => sum + player.totalPoints, 0) / gameState.players.length : 0,
+    fastestCompletionTime: Math.min(...gameState.players
+      .flatMap(player => player.missions
+        .filter(pm => pm.state === MissionState.COMPLETED && pm.completionTimeMs)
+        .map(pm => pm.completionTimeMs!)
+      ).filter(time => time > 0)) || 0,
+    configuredMissionsPerPlayer: gameState.configuration.missionsPerPlayer,
+    difficultyMode: gameState.configuration.difficultyMode
+  };
+
+  // Format time from milliseconds to readable format
+  const formatTime = (timeMs: number): string => {
+    if (timeMs === 0 || !isFinite(timeMs)) return '--';
+    const seconds = Math.floor(timeMs / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    
+    if (minutes > 0) {
+      return `${minutes}m ${remainingSeconds}s`;
+    }
+    return `${remainingSeconds}s`;
+  };
+
+  // Format game duration
+  const formatGameDuration = (durationMs: number): string => {
+    const minutes = Math.floor(durationMs / (1000 * 60));
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    
+    if (hours > 0) {
+      return `${hours}h ${remainingMinutes}m`;
+    }
+    return `${minutes}m`;
+  };
+
+  // Get difficulty display text in Italian
+  const getDifficultyText = (difficulty: DifficultyLevel): string => {
+    switch (difficulty) {
+      case DifficultyLevel.EASY:
+        return 'Facile';
+      case DifficultyLevel.MEDIUM:
+        return 'Medio';
+      case DifficultyLevel.HARD:
+        return 'Difficile';
+      default:
+        return 'Sconosciuto';
+    }
+  };
+
+  // Get performance highlights
+  const getPerformanceHighlights = () => {
+    const highlights: string[] = [];
+    
+    if (winner) {
+      highlights.push(`${winner.name} ha vinto con ${winner.totalPoints} punti`);
+    }
+    
+    if (gameStats.fastestCompletionTime > 0) {
+      highlights.push(`Missione più veloce: ${formatTime(gameStats.fastestCompletionTime)}`);
+    }
+    
+    const perfectPlayers = gameState.players.filter(p => 
+      p.completedMissions === gameStats.configuredMissionsPerPlayer
+    );
+    if (perfectPlayers.length > 0) {
+      highlights.push(`${perfectPlayers.length} giocator${perfectPlayers.length === 1 ? 'e ha' : 'i hanno'} completato tutte le missioni`);
+    }
+    
+    return highlights;
   };
 
   const handleNewGame = () => {
@@ -44,7 +124,7 @@ const EndGameScreen: React.FC = () => {
           style: 'destructive',
           onPress: () => {
             createGame();
-            router.push('/setup-players');
+            router.push('/game-configuration');
           },
         },
       ]
@@ -57,33 +137,18 @@ const EndGameScreen: React.FC = () => {
     router.push('/');
   };
 
-  const getMissionStateText = (state: MissionState): string => {
-    switch (state) {
-      case MissionState.WAITING:
-        return 'In Attesa';
-      case MissionState.ACTIVE:
-        return 'Attiva';
-      case MissionState.COMPLETED:
-        return 'Completata';
-      case MissionState.CAUGHT:
-        return 'Scoperta';
-      default:
-        return 'Sconosciuto';
-    }
-  };
-
   const getMissionStateColor = (state: MissionState): string => {
     switch (state) {
       case MissionState.WAITING:
-        return Colors.missionWaiting;
+        return theme.colors.missionWaiting;
       case MissionState.ACTIVE:
-        return Colors.missionActive;
+        return theme.colors.missionActive;
       case MissionState.COMPLETED:
-        return Colors.missionCompleted;
+        return theme.colors.missionCompleted;
       case MissionState.CAUGHT:
-        return Colors.missionCaught;
+        return theme.colors.missionCaught;
       default:
-        return Colors.missionWaiting;
+        return theme.colors.missionWaiting;
     }
   };
 
@@ -94,12 +159,15 @@ const EndGameScreen: React.FC = () => {
         <View style={styles.winnerSection}>
           {winner ? (
             <>
-              <Text style={styles.winnerTitle}>Partita Completata</Text>
+              <Text style={styles.winnerTitle}>🏆 Partita Completata</Text>
               <Text style={styles.winnerName}>{winner.name}</Text>
               <Text style={styles.winnerSubtext}>Vincitore</Text>
               <View style={styles.winnerStats}>
                 <Text style={styles.winnerStatsText}>
-                  {winner.completedCount} di {gameState.targetCompleted} missioni completate
+                  {winner.totalPoints} punti • {winner.completedMissions} missioni completate
+                </Text>
+                <Text style={styles.winnerStatsText}>
+                  Tempo medio: {formatTime(calculateAverageCompletionTime(winner))}
                 </Text>
               </View>
             </>
@@ -115,7 +183,7 @@ const EndGameScreen: React.FC = () => {
 
         {/* Game Statistics */}
         <View style={styles.statsSection}>
-          <Text style={styles.sectionTitle}>Statistiche</Text>
+          <Text style={styles.sectionTitle}>Statistiche della Partita</Text>
           
           <View style={styles.statsGrid}>
             <View style={styles.statCard}>
@@ -124,64 +192,123 @@ const EndGameScreen: React.FC = () => {
             </View>
             
             <View style={styles.statCard}>
-              <Text style={styles.statNumber}>{gameStats.completedMissions}</Text>
+              <Text style={styles.statNumber}>{gameStats.totalMissionsCompleted}</Text>
               <Text style={styles.statLabel}>Completate</Text>
             </View>
             
             <View style={styles.statCard}>
-              <Text style={styles.statNumber}>{gameStats.caughtMissions}</Text>
-              <Text style={styles.statLabel}>Scoperte</Text>
+              <Text style={styles.statNumber}>{gameStats.totalPointsAwarded}</Text>
+              <Text style={styles.statLabel}>Punti Totali</Text>
             </View>
             
             <View style={styles.statCard}>
-              <Text style={styles.statNumber}>{gameStats.gameDuration}</Text>
-              <Text style={styles.statLabel}>Minuti</Text>
+              <Text style={styles.statNumber}>{formatGameDuration(gameStats.gameDurationMs)}</Text>
+              <Text style={styles.statLabel}>Durata</Text>
             </View>
           </View>
+
+          {/* Performance Highlights */}
+          {getPerformanceHighlights().length > 0 && (
+            <View style={styles.highlightsSection}>
+              <Text style={styles.highlightsTitle}>Momenti Salienti</Text>
+              {getPerformanceHighlights().map((highlight, index) => (
+                <View key={index} style={styles.highlightItem}>
+                  <Text style={styles.highlightText}>• {highlight}</Text>
+                </View>
+              ))}
+            </View>
+          )}
         </View>
 
-        {/* Player Results */}
-        <View style={styles.playersSection}>
-          <Text style={styles.sectionTitle}>Classifica</Text>
+        {/* Final Leaderboard */}
+        <View style={styles.leaderboardSection}>
+          <Text style={styles.sectionTitle}>Classifica Finale</Text>
           
           {gameState.players
-            .sort((a, b) => b.completedCount - a.completedCount)
-            .map((player, index) => (
-              <View key={player.id} style={styles.playerResultCard}>
-                <View style={styles.playerResultHeader}>
-                  <View style={styles.playerRank}>
-                    <Text style={styles.rankNumber}>{index + 1}</Text>
+            .sort((a, b) => {
+              // Sort by total points (descending), then by average completion time (ascending)
+              if (a.totalPoints !== b.totalPoints) {
+                return b.totalPoints - a.totalPoints;
+              }
+              const avgTimeA = calculateAverageCompletionTime(a);
+              const avgTimeB = calculateAverageCompletionTime(b);
+              return avgTimeA - avgTimeB;
+            })
+            .map((player, index) => {
+              const avgCompletionTime = calculateAverageCompletionTime(player);
+              const isWinner = winner && winner.id === player.id;
+              
+              return (
+                <View key={player.id} style={[
+                  styles.playerResultCard,
+                  isWinner && styles.winnerCard
+                ]}>
+                  <View style={styles.playerResultHeader}>
+                    <View style={[
+                      styles.playerRank,
+                      isWinner && styles.winnerRank
+                    ]}>
+                      <Text style={[
+                        styles.rankNumber,
+                        isWinner && styles.winnerRankText
+                      ]}>
+                        {index + 1}
+                      </Text>
+                    </View>
+                    <View style={styles.playerInfo}>
+                      <Text style={styles.playerResultName}>{player.name}</Text>
+                      {isWinner && (
+                        <View style={styles.winnerBadge}>
+                          <Text style={styles.winnerBadgeText}>👑 Vincitore</Text>
+                        </View>
+                      )}
+                    </View>
                   </View>
-                  <View style={styles.playerInfo}>
-                    <Text style={styles.playerResultName}>{player.name}</Text>
-                    {winner && winner.id === player.id && (
-                      <View style={styles.winnerBadge}>
-                        <Text style={styles.winnerBadgeText}>Vincitore</Text>
+                  
+                  <View style={styles.playerResultStats}>
+                    <View style={styles.playerStat}>
+                      <Text style={styles.playerStatLabel}>Punti Totali</Text>
+                      <Text style={styles.playerStatValue}>{player.totalPoints}</Text>
+                    </View>
+                    
+                    <View style={styles.playerStat}>
+                      <Text style={styles.playerStatLabel}>Missioni Completate</Text>
+                      <Text style={styles.playerStatValue}>
+                        {player.completedMissions}/{gameStats.configuredMissionsPerPlayer}
+                      </Text>
+                    </View>
+                    
+                    <View style={styles.playerStat}>
+                      <Text style={styles.playerStatLabel}>Tempo Medio</Text>
+                      <Text style={styles.playerStatValue}>
+                        {formatTime(avgCompletionTime)}
+                      </Text>
+                    </View>
+
+                    {/* Mission breakdown */}
+                    {player.missions.length > 0 && (
+                      <View style={styles.missionBreakdown}>
+                        <Text style={styles.missionBreakdownTitle}>Dettaglio Missioni:</Text>
+                        {player.missions.map((playerMission, missionIndex) => (
+                          <View key={missionIndex} style={styles.missionItem}>
+                            <View style={[
+                              styles.missionDot,
+                              { backgroundColor: getMissionStateColor(playerMission.state) }
+                            ]} />
+                            <Text style={styles.missionText}>
+                              {getDifficultyText(playerMission.mission.difficulty)} ({playerMission.mission.points}pt)
+                              {playerMission.state === MissionState.COMPLETED && playerMission.completionTimeMs && 
+                                ` - ${formatTime(playerMission.completionTimeMs)}`
+                              }
+                            </Text>
+                          </View>
+                        ))}
                       </View>
                     )}
                   </View>
                 </View>
-                
-                <View style={styles.playerResultStats}>
-                  <View style={styles.playerStat}>
-                    <Text style={styles.playerStatLabel}>Missioni completate</Text>
-                    <Text style={styles.playerStatValue}>{player.completedCount}</Text>
-                  </View>
-                  
-                  <View style={styles.playerStat}>
-                    <Text style={styles.playerStatLabel}>Stato finale</Text>
-                    <View style={[
-                      styles.statusBadge, 
-                      { backgroundColor: getMissionStateColor(player.missionState) }
-                    ]}>
-                      <Text style={styles.statusText}>
-                        {getMissionStateText(player.missionState)}
-                      </Text>
-                    </View>
-                  </View>
-                </View>
-              </View>
-            ))}
+              );
+            })}
         </View>
 
         {/* Action Buttons */}
@@ -207,133 +334,168 @@ const EndGameScreen: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.backgroundSecondary,
+    backgroundColor: theme.colors.backgroundSecondary,
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    padding: Spacing.lg,
-    paddingBottom: Spacing.xxl,
+    padding: theme.spacing.lg,
+    paddingBottom: theme.spacing.xxl,
   },
   
   // Winner Section
   winnerSection: {
-    backgroundColor: Colors.backgroundPrimary,
-    borderRadius: BorderRadius.large,
-    padding: Spacing.xl,
-    marginBottom: Spacing.lg,
+    backgroundColor: theme.colors.backgroundPrimary,
+    borderRadius: theme.borderRadius.large,
+    padding: theme.spacing.xl,
+    marginBottom: theme.spacing.lg,
     alignItems: 'center',
-    ...Shadows.medium,
+    ...theme.shadows.medium,
   },
   winnerTitle: {
-    ...Typography.title2,
-    color: Colors.secondary,
-    marginBottom: Spacing.sm,
+    ...theme.typography.title2,
+    color: theme.colors.secondary,
+    marginBottom: theme.spacing.sm,
     textAlign: 'center',
   },
   winnerName: {
-    ...Typography.title1,
-    color: Colors.textPrimary,
-    marginBottom: Spacing.xs,
+    ...theme.typography.title1,
+    color: theme.colors.textPrimary,
+    marginBottom: theme.spacing.xs,
     textAlign: 'center',
   },
   winnerSubtext: {
-    ...Typography.headline,
-    color: Colors.primary,
-    marginBottom: Spacing.md,
+    ...theme.typography.headline,
+    color: theme.colors.primary,
+    marginBottom: theme.spacing.md,
     textAlign: 'center',
   },
   winnerStats: {
-    backgroundColor: Colors.backgroundSecondary,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    borderRadius: BorderRadius.medium,
+    backgroundColor: theme.colors.backgroundSecondary,
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.sm,
+    borderRadius: theme.borderRadius.medium,
+    alignItems: 'center',
   },
   winnerStatsText: {
-    ...Typography.callout,
-    color: Colors.textSecondary,
+    ...theme.typography.callout,
+    color: theme.colors.textSecondary,
     fontWeight: '600',
+    textAlign: 'center',
+    marginBottom: theme.spacing.xs,
   },
   noWinnerSubtext: {
-    ...Typography.body,
-    color: Colors.textSecondary,
+    ...theme.typography.body,
+    color: theme.colors.textSecondary,
     textAlign: 'center',
   },
   
   // Section Titles
   sectionTitle: {
-    ...Typography.title2,
-    color: Colors.secondary,
-    marginBottom: Spacing.md,
+    ...theme.typography.title2,
+    color: theme.colors.secondary,
+    marginBottom: theme.spacing.md,
   },
   
   // Statistics Section
   statsSection: {
-    backgroundColor: Colors.backgroundPrimary,
-    borderRadius: BorderRadius.large,
-    padding: Spacing.lg,
-    marginBottom: Spacing.lg,
-    ...Shadows.medium,
+    backgroundColor: theme.colors.backgroundPrimary,
+    borderRadius: theme.borderRadius.large,
+    padding: theme.spacing.lg,
+    marginBottom: theme.spacing.lg,
+    ...theme.shadows.medium,
   },
   statsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    gap: Spacing.md,
+    gap: theme.spacing.md,
+    marginBottom: theme.spacing.md,
   },
   statCard: {
-    backgroundColor: Colors.backgroundSecondary,
-    borderRadius: BorderRadius.medium,
-    padding: Spacing.md,
+    backgroundColor: theme.colors.backgroundSecondary,
+    borderRadius: theme.borderRadius.medium,
+    padding: theme.spacing.md,
     alignItems: 'center',
     width: '48%',
     minWidth: 120,
   },
   statNumber: {
-    ...Typography.title1,
-    color: Colors.accent,
-    marginBottom: Spacing.xs,
+    ...theme.typography.title1,
+    color: theme.colors.accent,
+    marginBottom: theme.spacing.xs,
   },
   statLabel: {
-    ...Typography.caption,
-    color: Colors.textSecondary,
+    ...theme.typography.caption,
+    color: theme.colors.textSecondary,
     textAlign: 'center',
     fontWeight: '500',
   },
   
-  // Players Section
-  playersSection: {
-    marginBottom: Spacing.lg,
+  // Performance Highlights
+  highlightsSection: {
+    marginTop: theme.spacing.md,
+    paddingTop: theme.spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.backgroundSecondary,
+  },
+  highlightsTitle: {
+    ...theme.typography.headline,
+    color: theme.colors.secondary,
+    marginBottom: theme.spacing.sm,
+  },
+  highlightItem: {
+    marginBottom: theme.spacing.xs,
+  },
+  highlightText: {
+    ...theme.typography.subhead,
+    color: theme.colors.textSecondary,
+  },
+  
+  // Leaderboard Section
+  leaderboardSection: {
+    marginBottom: theme.spacing.lg,
   },
   playerResultCard: {
-    backgroundColor: Colors.backgroundPrimary,
-    borderRadius: BorderRadius.medium,
-    padding: Spacing.md,
-    marginBottom: Spacing.md,
-    ...Shadows.small,
+    backgroundColor: theme.colors.backgroundPrimary,
+    borderRadius: theme.borderRadius.medium,
+    padding: theme.spacing.md,
+    marginBottom: theme.spacing.md,
+    ...theme.shadows.small,
+  },
+  winnerCard: {
+    borderWidth: 2,
+    borderColor: theme.colors.primary,
+    ...theme.shadows.medium,
   },
   playerResultHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: Spacing.md,
+    marginBottom: theme.spacing.md,
   },
   playerRank: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: Colors.accent,
+    backgroundColor: theme.colors.accent,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: Spacing.md,
+    marginRight: theme.spacing.md,
+  },
+  winnerRank: {
+    backgroundColor: theme.colors.primary,
   },
   rankNumber: {
-    ...Typography.footnote,
+    ...theme.typography.footnote,
     fontWeight: 'bold',
-    color: Colors.backgroundPrimary,
+    color: theme.colors.backgroundPrimary,
+  },
+  winnerRankText: {
+    color: theme.colors.backgroundPrimary,
   },
   playerInfo: {
     flex: 1,
@@ -342,22 +504,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   playerResultName: {
-    ...Typography.headline,
-    color: Colors.textPrimary,
+    ...theme.typography.headline,
+    color: theme.colors.textPrimary,
   },
   winnerBadge: {
-    backgroundColor: Colors.primary,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: Spacing.xs,
-    borderRadius: BorderRadius.small,
+    backgroundColor: theme.colors.primary,
+    paddingHorizontal: theme.spacing.sm,
+    paddingVertical: theme.spacing.xs,
+    borderRadius: theme.borderRadius.small,
   },
   winnerBadgeText: {
-    ...Typography.caption,
-    color: Colors.backgroundPrimary,
+    ...theme.typography.caption,
+    color: theme.colors.backgroundPrimary,
     fontWeight: '600',
   },
   playerResultStats: {
-    gap: Spacing.sm,
+    gap: theme.spacing.sm,
   },
   playerStat: {
     flexDirection: 'row',
@@ -365,31 +527,63 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   playerStatLabel: {
-    ...Typography.subhead,
-    color: Colors.textSecondary,
+    ...theme.typography.subhead,
+    color: theme.colors.textSecondary,
   },
   playerStatValue: {
-    ...Typography.subhead,
-    color: Colors.textPrimary,
+    ...theme.typography.subhead,
+    color: theme.colors.textPrimary,
     fontWeight: '600',
   },
+  
+  // Mission Breakdown
+  missionBreakdown: {
+    marginTop: theme.spacing.sm,
+    paddingTop: theme.spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.backgroundSecondary,
+  },
+  missionBreakdownTitle: {
+    ...theme.typography.caption,
+    color: theme.colors.textSecondary,
+    fontWeight: '600',
+    marginBottom: theme.spacing.xs,
+  },
+  missionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: theme.spacing.xs,
+  },
+  missionDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: theme.spacing.sm,
+  },
+  missionText: {
+    ...theme.typography.caption,
+    color: theme.colors.textSecondary,
+    flex: 1,
+  },
+  
+  // Legacy status badge (kept for compatibility)
   statusBadge: {
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: Spacing.xs,
-    borderRadius: BorderRadius.small,
+    paddingHorizontal: theme.spacing.sm,
+    paddingVertical: theme.spacing.xs,
+    borderRadius: theme.borderRadius.small,
   },
   statusText: {
-    ...Typography.caption,
-    color: Colors.backgroundPrimary,
+    ...theme.typography.caption,
+    color: theme.colors.backgroundPrimary,
     fontWeight: '500',
   },
   
   // Action Buttons
   actionButtons: {
-    gap: Spacing.md,
+    gap: theme.spacing.md,
   },
   primaryButton: {
-    marginBottom: Spacing.sm,
+    marginBottom: theme.spacing.sm,
   },
   secondaryButton: {
     // Additional styling if needed

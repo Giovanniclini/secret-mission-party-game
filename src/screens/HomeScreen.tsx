@@ -36,7 +36,7 @@ const HomeScreen: React.FC = () => {
             onPress: async () => {
               await handleAsyncError(async () => {
                 createGame();
-                router.push('/setup-players');
+                router.push('/game-configuration');
               }, 'Errore durante la creazione di una nuova partita.');
             },
           },
@@ -45,7 +45,7 @@ const HomeScreen: React.FC = () => {
     } else {
       await handleAsyncError(async () => {
         createGame();
-        router.push('/setup-players');
+        router.push('/game-configuration');
       }, 'Errore durante la creazione di una nuova partita.');
     }
   };
@@ -55,13 +55,16 @@ const HomeScreen: React.FC = () => {
       // Navigate to appropriate screen based on game status
       switch (gameState.status) {
         case GameStatus.SETUP:
+          router.push('/game-configuration');
+          break;
+        case GameStatus.CONFIGURING:
           router.push('/setup-players');
           break;
         case GameStatus.ASSIGNING:
           router.push('/assign-missions');
           break;
         case GameStatus.IN_PROGRESS:
-          router.push('/game-dashboard');
+          router.push('/(tabs)/explore');
           break;
         default:
           throw new Error('Stato del gioco non valido per la ripresa');
@@ -149,6 +152,8 @@ const getGameStatusText = (status: GameStatus): string => {
   switch (status) {
     case GameStatus.SETUP:
       return 'Configurazione';
+    case GameStatus.CONFIGURING:
+      return 'Configurazione Partita';
     case GameStatus.ASSIGNING:
       return 'Assegnazione Missioni';
     case GameStatus.IN_PROGRESS:

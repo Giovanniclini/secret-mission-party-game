@@ -15,5 +15,3 @@ export { Input } from './Input';
 
 export { StatusIndicator } from './StatusIndicator';
 export type { StatusType } from './StatusIndicator';
-
-export { DesignSystemDemo } from './DesignSystemDemo';

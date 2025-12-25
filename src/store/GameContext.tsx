@@ -1,20 +1,23 @@
 // Game Context with useReducer and AsyncStorage persistence with error handling
 import React, { createContext, useContext, useReducer, useEffect, ReactNode, useState } from 'react';
-import { GameState, createInitialGameState, Player, Mission, MissionState, GameStatus } from '../models';
+import { GameState, createInitialGameState, Player, Mission, MissionState, GameStatus, GameConfiguration, DifficultyLevel } from '../models';
 import { gameReducer } from './gameReducer';
 import { 
   GameAction, 
   createGame,
+  configureGame,
   addPlayer,
   removePlayer,
-  assignMissions,
-  updateMissionState,
+  assignMissionWithDifficulty,
+  completeMissionWithTiming,
+  endGameManually,
   updateGameStatus,
   loadGame,
-  clearFinishedGame
+  clearFinishedGame,
+  clearAllMissions
 } from './gameActions';
 import { saveGameState, loadGameState, StorageResult } from '../utils/storage';
-import { validateGameState } from '../utils/validation';
+import { validateEnhancedGameState } from '../utils/validation';
 
 interface GameContextType {
   gameState: GameState;
@@ -62,7 +65,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
         
         if (result.success && result.data) {
           // Validate the loaded state
-          const validation = validateGameState(result.data);
+          const validation = validateEnhancedGameState(result.data);
           if (validation.isValid) {
             dispatch(loadGame(result.data));
             
@@ -98,7 +101,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
     const saveCurrentGameState = async () => {
       try {
         // Validate state before saving
-        const validation = validateGameState(gameState);
+        const validation = validateEnhancedGameState(gameState);
         if (!validation.isValid) {
           console.error('Invalid game state, not saving:', validation.error);
           setError('Stato del gioco non valido. I progressi potrebbero non essere salvati.');
@@ -157,13 +160,17 @@ export const useGameActions = () => {
   
   return {
     createGame: () => dispatch(createGame()),
-    addPlayer: (player: Player, mission?: Mission) => dispatch(addPlayer(player, mission)),
+    configureGame: (configuration: GameConfiguration) => dispatch(configureGame(configuration)),
+    addPlayer: (player: Player) => dispatch(addPlayer(player)),
     removePlayer: (playerId: string) => dispatch(removePlayer(playerId)),
-    assignMissions: (missions: Mission[]) => dispatch(assignMissions(missions)),
-    updateMissionState: (playerId: string, newState: MissionState) => 
-      dispatch(updateMissionState(playerId, newState)),
+    assignMissionWithDifficulty: (playerId: string, mission: Mission, difficulty?: DifficultyLevel) => 
+      dispatch(assignMissionWithDifficulty(playerId, mission, difficulty)),
+    completeMissionWithTiming: (playerId: string, missionId: string, state: MissionState.COMPLETED | MissionState.CAUGHT, completedAt?: Date) => 
+      dispatch(completeMissionWithTiming(playerId, missionId, state, completedAt)),
+    endGameManually: () => dispatch(endGameManually()),
     updateGameStatus: (status: GameStatus) => dispatch(updateGameStatus(status)),
     clearFinishedGame: () => dispatch(clearFinishedGame()),
+    clearAllMissions: () => dispatch(clearAllMissions()),
     hasError: !!error
   };
 };

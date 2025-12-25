@@ -16,16 +16,27 @@ export default function RootLayout() {
 
   return (
     <GameProvider>
-      <CustomThemeProvider>
+      <CustomThemeProvider forcedColorScheme={colorScheme === 'dark' ? 'dark' : 'light'}>
         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
           <Stack>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="(tabs)" options={{ headerShown: false, title: '' }} />
+            <Stack.Screen 
+              name="game-configuration" 
+              options={{ 
+                title: 'Configurazione Partita',
+                headerBackVisible: true, // Enable back button to go to homepage
+                headerBackTitle: undefined, // Explicitly set to undefined
+                gestureEnabled: true, // Enable swipe back gesture on iOS
+                presentation: 'card'
+              }} 
+            />
             <Stack.Screen 
               name="setup-players" 
               options={{ 
                 title: 'Configurazione Giocatori',
-                headerBackVisible: false, // Disable back button
-                gestureEnabled: false, // Disable swipe back gesture on iOS
+                headerBackVisible: true, // Enable back button to go to game-configuration
+                headerBackTitle: ' ', // Use a space to hide the back button text
+                gestureEnabled: true, // Enable swipe back gesture on iOS
                 presentation: 'card'
               }} 
             />
@@ -33,17 +44,9 @@ export default function RootLayout() {
               name="assign-missions" 
               options={{ 
                 title: 'Assegnazione Missioni',
-                headerBackVisible: false, // Disable back button
-                gestureEnabled: false, // Disable swipe back gesture on iOS
-                presentation: 'card'
-              }} 
-            />
-            <Stack.Screen 
-              name="game-dashboard" 
-              options={{ 
-                title: 'Dashboard di Gioco',
-                headerBackVisible: false, // Disable back button
-                gestureEnabled: false, // Disable swipe back gesture on iOS
+                headerBackVisible: true, // Enable back button to go to setup-players
+                headerBackTitle: ' ', // Use a space to hide the back button text
+                gestureEnabled: true, // Enable swipe back gesture on iOS
                 presentation: 'card'
               }} 
             />

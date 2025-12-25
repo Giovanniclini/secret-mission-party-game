@@ -5,6 +5,7 @@ import {
   StyleSheet, 
   TouchableOpacity 
 } from 'react-native';
+import { useTheme } from '../theme';
 
 interface PrivacyScreenProps {
   playerName: string;
@@ -19,6 +20,9 @@ const PrivacyScreen: React.FC<PrivacyScreenProps> = ({
   onCancel,
   message 
 }) => {
+  const theme = useTheme();
+  const styles = createStyles(theme);
+  
   return (
     <View style={styles.container}>
       <View style={styles.content}>
@@ -62,75 +66,73 @@ const PrivacyScreen: React.FC<PrivacyScreenProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#2c3e50',
+    backgroundColor: theme.colors.secondary,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: theme.spacing.md,
   },
   content: {
     alignItems: 'center',
     maxWidth: 300,
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'white',
-    marginBottom: 32,
+    ...theme.typography.title2,
+    color: theme.colors.backgroundPrimary,
+    marginBottom: theme.spacing.xl,
     textAlign: 'center',
   },
   playerName: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#3498db',
-    marginBottom: 24,
+    ...theme.typography.title1,
+    color: theme.colors.primary,
+    marginBottom: theme.spacing.lg,
     textAlign: 'center',
   },
   message: {
-    fontSize: 18,
-    color: 'white',
+    ...theme.typography.body,
+    color: theme.colors.backgroundPrimary,
     textAlign: 'center',
-    marginBottom: 16,
+    marginBottom: theme.spacing.lg,
     lineHeight: 24,
   },
   instruction: {
-    fontSize: 16,
-    color: '#e74c3c',
+    ...theme.typography.callout,
+    color: theme.colors.error,
     textAlign: 'center',
-    marginBottom: 40,
+    marginBottom: theme.spacing.xxl,
     fontWeight: '600',
   },
   buttonContainer: {
     alignItems: 'center',
-    gap: 16,
+    gap: theme.spacing.lg,
   },
   continueButton: {
-    backgroundColor: '#27ae60',
-    paddingHorizontal: 32,
-    paddingVertical: 16,
-    borderRadius: 8,
+    backgroundColor: theme.colors.success,
+    paddingHorizontal: theme.spacing.xl,
+    paddingVertical: theme.spacing.lg,
+    borderRadius: theme.borderRadius.small,
     minWidth: 200,
   },
   continueButtonText: {
-    color: 'white',
-    fontSize: 18,
+    ...theme.typography.headline,
+    color: theme.colors.backgroundPrimary,
     fontWeight: '600',
     textAlign: 'center',
   },
   cancelButton: {
     backgroundColor: 'transparent',
-    paddingHorizontal: 32,
-    paddingVertical: 12,
-    borderRadius: 8,
+    paddingHorizontal: theme.spacing.xl,
+    paddingVertical: theme.spacing.md,
+    borderRadius: theme.borderRadius.small,
     borderWidth: 2,
-    borderColor: 'white',
+    borderColor: theme.colors.backgroundPrimary,
     minWidth: 200,
   },
   cancelButtonText: {
-    color: 'white',
-    fontSize: 16,
+    ...theme.typography.callout,
+    color: theme.colors.backgroundPrimary,
     fontWeight: '600',
     textAlign: 'center',
   },

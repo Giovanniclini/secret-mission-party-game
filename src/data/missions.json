@@ -3,127 +3,152 @@
     {
       "id": "1",
       "text": "Fai ridere qualcuno senza che se ne accorga",
-      "difficulty": "easy"
+      "difficulty": "EASY",
+      "points": 1
     },
     {
       "id": "2",
       "text": "Convincere qualcuno a offrirti qualcosa da bere",
-      "difficulty": "medium"
+      "difficulty": "MEDIUM",
+      "points": 2
     },
     {
       "id": "3",
       "text": "Fai un complimento a qualcuno sui suoi vestiti",
-      "difficulty": "easy"
+      "difficulty": "EASY",
+      "points": 1
     },
     {
       "id": "4",
       "text": "Chiedi a qualcuno di raccontarti una barzelletta",
-      "difficulty": "easy"
+      "difficulty": "EASY",
+      "points": 1
     },
     {
       "id": "5",
       "text": "Convincere qualcuno a cantare una canzone",
-      "difficulty": "hard"
+      "difficulty": "HARD",
+      "points": 3
     },
     {
       "id": "6",
       "text": "Fai dire a qualcuno la parola 'banana' in una conversazione",
-      "difficulty": "medium"
+      "difficulty": "MEDIUM",
+      "points": 2
     },
     {
       "id": "7",
       "text": "Ottieni un high-five da qualcuno",
-      "difficulty": "easy"
+      "difficulty": "EASY",
+      "points": 1
     },
     {
       "id": "8",
       "text": "Convincere qualcuno a condividere un ricordo d'infanzia",
-      "difficulty": "medium"
+      "difficulty": "MEDIUM",
+      "points": 2
     },
     {
       "id": "9",
       "text": "Fai dire a qualcuno il nome del suo animale domestico",
-      "difficulty": "easy"
+      "difficulty": "EASY",
+      "points": 1
     },
     {
       "id": "10",
       "text": "Convincere qualcuno a imitare un animale",
-      "difficulty": "hard"
+      "difficulty": "HARD",
+      "points": 3
     },
     {
       "id": "11",
       "text": "Fai dire a qualcuno qual è il suo cibo preferito",
-      "difficulty": "easy"
+      "difficulty": "EASY",
+      "points": 1
     },
     {
       "id": "12",
       "text": "Ottieni un abbraccio da qualcuno",
-      "difficulty": "medium"
+      "difficulty": "MEDIUM",
+      "points": 2
     },
     {
       "id": "13",
       "text": "Convincere qualcuno a ballare per 10 secondi",
-      "difficulty": "hard"
+      "difficulty": "HARD",
+      "points": 3
     },
     {
       "id": "14",
       "text": "Fai dire a qualcuno il nome della sua città natale",
-      "difficulty": "easy"
+      "difficulty": "EASY",
+      "points": 1
     },
     {
       "id": "15",
       "text": "Convincere qualcuno a raccontare una storia imbarazzante",
-      "difficulty": "hard"
+      "difficulty": "HARD",
+      "points": 3
     },
     {
       "id": "16",
       "text": "Fai dire a qualcuno qual è il suo colore preferito",
-      "difficulty": "easy"
+      "difficulty": "EASY",
+      "points": 1
     },
     {
       "id": "17",
       "text": "Convincere qualcuno a fare una foto insieme",
-      "difficulty": "medium"
+      "difficulty": "MEDIUM",
+      "points": 2
     },
     {
       "id": "18",
       "text": "Fai dire a qualcuno il titolo del suo film preferito",
-      "difficulty": "easy"
+      "difficulty": "EASY",
+      "points": 1
     },
     {
       "id": "19",
       "text": "Convincere qualcuno a fare un'imitazione di una celebrità",
-      "difficulty": "hard"
+      "difficulty": "HARD",
+      "points": 3
     },
     {
       "id": "20",
       "text": "Fai dire a qualcuno qual è il suo hobby preferito",
-      "difficulty": "easy"
+      "difficulty": "EASY",
+      "points": 1
     },
     {
       "id": "21",
       "text": "Convincere qualcuno a raccontare una barzelletta",
-      "difficulty": "medium"
+      "difficulty": "MEDIUM",
+      "points": 2
     },
     {
       "id": "22",
       "text": "Fai dire a qualcuno il nome del suo cantante preferito",
-      "difficulty": "easy"
+      "difficulty": "EASY",
+      "points": 1
     },
     {
       "id": "23",
       "text": "Convincere qualcuno a fare un gioco di parole",
-      "difficulty": "medium"
+      "difficulty": "MEDIUM",
+      "points": 2
     },
     {
       "id": "24",
       "text": "Fai dire a qualcuno qual è la sua stagione preferita",
-      "difficulty": "easy"
+      "difficulty": "EASY",
+      "points": 1
     },
     {
       "id": "25",
       "text": "Convincere qualcuno a raccontare il suo sogno più strano",
-      "difficulty": "hard"
+      "difficulty": "HARD",
+      "points": 3
     }
   ]
 }

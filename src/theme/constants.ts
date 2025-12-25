@@ -5,7 +5,7 @@
  * These values must be used consistently across all components.
  */
 
-export const Colors = {
+export const LightColors = {
   // Primary / Brand (CTA)
   primary: '#F5B301',
   
@@ -34,6 +34,39 @@ export const Colors = {
   missionCaught: '#EF4444',    // Red for caught missions
   missionWaiting: '#6B7280',   // Gray for waiting missions
 } as const;
+
+export const DarkColors = {
+  // Primary / Brand (CTA) - slightly brighter for dark mode
+  primary: '#FFD700',
+  
+  // Secondary (headers, nav) - lighter for contrast
+  secondary: '#E5E7EB',
+  
+  // Accent (active, focus) - slightly brighter
+  accent: '#34D399',
+  
+  // Text colors - inverted for dark mode
+  textPrimary: '#F9FAFB',
+  textSecondary: '#9CA3AF',
+  
+  // Background colors - dark variants
+  backgroundPrimary: '#111827',
+  backgroundSecondary: '#1F2937',
+  
+  // Status colors - adjusted for dark mode visibility
+  success: '#34D399',
+  error: '#F87171',
+  warning: '#FBBF24',
+  
+  // Mission state colors - adjusted for dark mode
+  missionActive: '#34D399',    // Brighter green for active missions
+  missionCompleted: '#10B981', // Keep green for completed missions
+  missionCaught: '#F87171',    // Lighter red for caught missions
+  missionWaiting: '#9CA3AF',   // Lighter gray for waiting missions
+} as const;
+
+// Default to light colors for backward compatibility
+export const Colors = LightColors;
 
 export const Spacing = {
   xs: 4,
@@ -117,7 +150,13 @@ export const Shadows = {
   },
 } as const;
 
-export type ColorKey = keyof typeof Colors;
+export type ColorKey = keyof typeof LightColors;
 export type SpacingKey = keyof typeof Spacing;
 export type BorderRadiusKey = keyof typeof BorderRadius;
 export type TypographyKey = keyof typeof Typography;
+
+export type ColorScheme = 'light' | 'dark';
+
+export const getColors = (colorScheme: ColorScheme) => {
+  return colorScheme === 'dark' ? DarkColors : LightColors;
+};
