@@ -50,9 +50,9 @@ describe('Mission Loading', () => {
     expect(missions.length).toBeGreaterThan(0);
   });
 
-  test('should load exactly 25 missions', () => {
+  test('should load exactly 150 missions', () => {
     const missions = loadMissions();
-    expect(missions.length).toBe(25);
+    expect(missions.length).toBe(150);
   });
 
   test('should have missions with required properties', () => {
@@ -107,10 +107,10 @@ describe('Mission Loading', () => {
     expect(hasEnoughMissions(totalPlayers, missionsPerPlayer)).toBe(true);
     
     // Should have enough easy missions for smaller requirement
-    expect(hasEnoughMissions(totalPlayers, 3, DifficultyLevel.EASY)).toBe(true); // 3×3=9, we have 12
+    expect(hasEnoughMissions(totalPlayers, 3, DifficultyLevel.EASY)).toBe(true); // 3×3=9, we have 50
     
-    // Should not have enough easy missions for larger requirement
-    expect(hasEnoughMissions(totalPlayers, missionsPerPlayer, DifficultyLevel.EASY)).toBe(false); // 3×5=15, we have 12
+    // Should have enough easy missions for larger requirement too now
+    expect(hasEnoughMissions(totalPlayers, missionsPerPlayer, DifficultyLevel.EASY)).toBe(true); // 3×5=15, we have 50
   });
 });
 

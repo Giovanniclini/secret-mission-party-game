@@ -105,10 +105,7 @@ const GameConfigurationScreen: React.FC = () => {
   };
 
   return (
-    <ScrollView 
-      style={[styles.container, { backgroundColor: theme.colors.backgroundPrimary }]}
-      contentContainerStyle={styles.contentContainer}
-    >
+    <View style={[styles.container, { backgroundColor: theme.colors.backgroundPrimary }]}>
       <StatusBar barStyle="dark-content" backgroundColor={theme.colors.backgroundPrimary} />
       
       <ErrorNotification
@@ -118,132 +115,141 @@ const GameConfigurationScreen: React.FC = () => {
         type={error.type}
       />
 
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={[styles.title, { color: theme.colors.secondary }, theme.typography.title2]}>
-          Configurazione Partita
-        </Text>
-        <Text style={[styles.subtitle, { color: theme.colors.textSecondary }, theme.typography.callout]}>
-          Personalizza le impostazioni del gioco
-        </Text>
-      </View>
-
-      {/* Mission Count Configuration */}
-      <Card style={styles.configCard}>
-        <Text style={[styles.sectionTitle, { color: theme.colors.textPrimary }, theme.typography.headline]}>
-          Missioni per Giocatore
-        </Text>
-        <Text style={[styles.sectionDescription, { color: theme.colors.textSecondary }, theme.typography.subhead]}>
-          Scegli quante missioni ogni giocatore deve completare
-        </Text>
-        
-        <View style={styles.missionCountContainer}>
-          <View style={styles.missionCountControls}>
-            <Button
-              title="-"
-              onPress={() => handleMissionCountChange(missionsPerPlayer - 1)}
-              variant="secondary"
-              size="small"
-              disabled={missionsPerPlayer <= 1}
-              style={styles.countButton}
-            />
-            <View style={[styles.countDisplay, { backgroundColor: theme.colors.backgroundSecondary }]}>
-              <Text style={[styles.countText, { color: theme.colors.textPrimary }, theme.typography.title2]}>
-                {missionsPerPlayer}
-              </Text>
-            </View>
-            <Button
-              title="+"
-              onPress={() => handleMissionCountChange(missionsPerPlayer + 1)}
-              variant="secondary"
-              size="small"
-              disabled={missionsPerPlayer >= 10}
-              style={styles.countButton}
-            />
-          </View>
-          <Text style={[styles.countLabel, { color: theme.colors.textSecondary }, theme.typography.footnote]}>
-            {missionsPerPlayer === 1 ? 'missione' : 'missioni'}
+      {/* Scrollable Content */}
+      <ScrollView 
+        style={styles.scrollContainer}
+        contentContainerStyle={styles.contentContainer}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={[styles.title, { color: theme.colors.secondary }, theme.typography.title2]}>
+            Configurazione Partita
+          </Text>
+          <Text style={[styles.subtitle, { color: theme.colors.textSecondary }, theme.typography.callout]}>
+            Personalizza le impostazioni del gioco
           </Text>
         </View>
-      </Card>
 
-      {/* Difficulty Mode Configuration */}
-      <Card style={styles.configCard}>
-        <Text style={[styles.sectionTitle, { color: theme.colors.textPrimary }, theme.typography.headline]}>
-          Modalità Difficoltà
-        </Text>
-        <Text style={[styles.sectionDescription, { color: theme.colors.textSecondary }, theme.typography.subhead]}>
-          Scegli come assegnare la difficoltà delle missioni
-        </Text>
-        
-        <View style={styles.difficultyModeContainer}>
-          <Button
-            title={getDifficultyModeLabel(difficultyMode)}
-            onPress={handleDifficultyModeToggle}
-            variant={difficultyMode === DifficultyMode.UNIFORM ? "primary" : "secondary"}
-            size="medium"
-            style={styles.modeToggleButton}
-          />
-          
-          <Text style={[styles.modeDescription, { color: theme.colors.textSecondary }, theme.typography.footnote]}>
-            {difficultyMode === DifficultyMode.UNIFORM 
-              ? 'Tutte le missioni avranno la stessa difficoltà'
-              : 'I giocatori scelgono la difficoltà per ogni missione'
-            }
-          </Text>
-        </View>
-      </Card>
-
-      {/* Uniform Difficulty Selector (only shown in uniform mode) */}
-      {difficultyMode === DifficultyMode.UNIFORM && (
+        {/* Mission Count Configuration */}
         <Card style={styles.configCard}>
           <Text style={[styles.sectionTitle, { color: theme.colors.textPrimary }, theme.typography.headline]}>
-            Livello di Difficoltà
+            Missioni per Giocatore
           </Text>
           <Text style={[styles.sectionDescription, { color: theme.colors.textSecondary }, theme.typography.subhead]}>
-            Seleziona il livello di difficoltà per tutte le missioni
+            Scegli quante missioni ogni giocatore deve completare
           </Text>
           
-          <View style={styles.difficultySelector}>
-            {Object.values(DifficultyLevel).map((difficulty) => (
+          <View style={styles.missionCountContainer}>
+            <View style={styles.missionCountControls}>
               <Button
-                key={difficulty}
-                title={`${getDifficultyLabel(difficulty)} (${getDifficultyPoints(difficulty)} pt)`}
-                onPress={() => handleUniformDifficultyChange(difficulty)}
-                variant={uniformDifficulty === difficulty ? "primary" : "secondary"}
-                size="medium"
-                style={styles.difficultyButton}
+                title="-"
+                onPress={() => handleMissionCountChange(missionsPerPlayer - 1)}
+                variant="secondary"
+                size="small"
+                disabled={missionsPerPlayer <= 1}
+                style={styles.countButton}
               />
-            ))}
+              <View style={[styles.countDisplay, { backgroundColor: theme.colors.backgroundSecondary }]}>
+                <Text style={[styles.countText, { color: theme.colors.textPrimary }, theme.typography.title2]}>
+                  {missionsPerPlayer}
+                </Text>
+              </View>
+              <Button
+                title="+"
+                onPress={() => handleMissionCountChange(missionsPerPlayer + 1)}
+                variant="secondary"
+                size="small"
+                disabled={missionsPerPlayer >= 10}
+                style={styles.countButton}
+              />
+            </View>
+            <Text style={[styles.countLabel, { color: theme.colors.textSecondary }, theme.typography.footnote]}>
+              {missionsPerPlayer === 1 ? 'missione' : 'missioni'}
+            </Text>
           </View>
         </Card>
-      )}
 
-      {/* Point Values Information */}
-      <Card style={StyleSheet.flatten([styles.configCard, styles.infoCard])}>
-        <Text style={[styles.sectionTitle, { color: theme.colors.textPrimary }, theme.typography.headline]}>
-          Valori Punti
-        </Text>
-        <Text style={[styles.sectionDescription, { color: theme.colors.textSecondary }, theme.typography.subhead]}>
-          Punti assegnati per difficoltà
-        </Text>
-        
-        <View style={styles.pointsInfo}>
-          {Object.values(DifficultyLevel).map((difficulty) => (
-            <View key={difficulty} style={styles.pointsRow}>
-              <Text style={[styles.pointsLabel, { color: theme.colors.textPrimary }, theme.typography.callout]}>
-                {getDifficultyLabel(difficulty)}:
-              </Text>
-              <Text style={[styles.pointsValue, { color: theme.colors.primary }, theme.typography.callout]}>
-                {getDifficultyPoints(difficulty)} {getDifficultyPoints(difficulty) === 1 ? 'punto' : 'punti'}
-              </Text>
+        {/* Difficulty Mode Configuration */}
+        <Card style={styles.configCard}>
+          <Text style={[styles.sectionTitle, { color: theme.colors.textPrimary }, theme.typography.headline]}>
+            Modalità Difficoltà
+          </Text>
+          <Text style={[styles.sectionDescription, { color: theme.colors.textSecondary }, theme.typography.subhead]}>
+            Scegli come assegnare la difficoltà delle missioni
+          </Text>
+          
+          <View style={styles.difficultyModeContainer}>
+            <Button
+              title={getDifficultyModeLabel(difficultyMode)}
+              onPress={handleDifficultyModeToggle}
+              variant={difficultyMode === DifficultyMode.UNIFORM ? "primary" : "secondary"}
+              size="medium"
+              style={styles.modeToggleButton}
+            />
+            
+            <Text style={[styles.modeDescription, { color: theme.colors.textSecondary }, theme.typography.footnote]}>
+              {difficultyMode === DifficultyMode.UNIFORM 
+                ? 'Tutte le missioni avranno la stessa difficoltà'
+                : 'I giocatori scelgono la difficoltà per ogni missione'
+              }
+            </Text>
+          </View>
+        </Card>
+
+        {/* Uniform Difficulty Selector (only shown in uniform mode) */}
+        {difficultyMode === DifficultyMode.UNIFORM && (
+          <Card style={styles.configCard}>
+            <Text style={[styles.sectionTitle, { color: theme.colors.textPrimary }, theme.typography.headline]}>
+              Livello di Difficoltà
+            </Text>
+            <Text style={[styles.sectionDescription, { color: theme.colors.textSecondary }, theme.typography.subhead]}>
+              Seleziona il livello di difficoltà per tutte le missioni
+            </Text>
+            
+            <View style={styles.difficultySelector}>
+              {Object.values(DifficultyLevel).map((difficulty) => (
+                <Button
+                  key={difficulty}
+                  title={`${getDifficultyLabel(difficulty)} (${getDifficultyPoints(difficulty)} pt)`}
+                  onPress={() => handleUniformDifficultyChange(difficulty)}
+                  variant={uniformDifficulty === difficulty ? "primary" : "secondary"}
+                  size="medium"
+                  style={styles.difficultyButton}
+                />
+              ))}
             </View>
-          ))}
-        </View>
-      </Card>
+          </Card>
+        )}
 
-      {/* Continue Button */}
-      <View style={styles.actionSection}>
+        {/* Point Values Information (only shown in mixed mode) */}
+        {difficultyMode === DifficultyMode.MIXED && (
+          <Card style={StyleSheet.flatten([styles.configCard, styles.infoCard])}>
+            <Text style={[styles.sectionTitle, { color: theme.colors.textPrimary }, theme.typography.headline]}>
+              Valori Punti
+            </Text>
+            <Text style={[styles.sectionDescription, { color: theme.colors.textSecondary }, theme.typography.subhead]}>
+              Punti assegnati per difficoltà
+            </Text>
+            
+            <View style={styles.pointsInfo}>
+              {Object.values(DifficultyLevel).map((difficulty) => (
+                <View key={difficulty} style={styles.pointsRow}>
+                  <Text style={[styles.pointsLabel, { color: theme.colors.textPrimary }, theme.typography.callout]}>
+                    {getDifficultyLabel(difficulty)}:
+                  </Text>
+                  <Text style={[styles.pointsValue, { color: theme.colors.primary }, theme.typography.callout]}>
+                    {getDifficultyPoints(difficulty)} {getDifficultyPoints(difficulty) === 1 ? 'punto' : 'punti'}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          </Card>
+        )}
+      </ScrollView>
+
+      {/* Fixed Continue Button */}
+      <View style={styles.fixedButtonContainer}>
         <Button
           title="Continua"
           onPress={handleContinue}
@@ -252,7 +258,7 @@ const GameConfigurationScreen: React.FC = () => {
           style={styles.continueButton}
         />
       </View>
-    </ScrollView>
+    </View>
   );
 };
 
@@ -261,9 +267,12 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.backgroundSecondary,
   },
+  scrollContainer: {
+    flex: 1,
+  },
   contentContainer: {
     padding: theme.spacing.lg,
-    paddingBottom: theme.spacing.xxl,
+    paddingBottom: theme.spacing.lg,
   },
   header: {
     alignItems: 'center',
@@ -377,8 +386,12 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     color: theme.colors.accent,
     fontWeight: '600',
   },
-  actionSection: {
-    marginTop: theme.spacing.lg,
+  fixedButtonContainer: {
+    padding: theme.spacing.lg,
+    paddingTop: theme.spacing.md,
+    backgroundColor: theme.colors.backgroundPrimary,
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.backgroundSecondary,
   },
   continueButton: {
     width: '100%',

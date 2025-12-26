@@ -4,8 +4,8 @@ import {
   Text, 
   StyleSheet, 
   ScrollView,
-  SafeAreaView,
-  Alert 
+  Alert,
+  StatusBar 
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useGameContext, useGameActions } from '../store/GameContext';
@@ -153,7 +153,10 @@ const EndGameScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
+      <StatusBar backgroundColor={theme.colors.backgroundSecondary} barStyle="dark-content" />
+      
+      {/* Scrollable Content */}
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         {/* Winner Announcement */}
         <View style={styles.winnerSection}>
@@ -310,27 +313,27 @@ const EndGameScreen: React.FC = () => {
               );
             })}
         </View>
-
-        {/* Action Buttons */}
-        <View style={styles.actionButtons}>
-          <Button
-            title="Nuova Partita"
-            onPress={handleNewGame}
-            variant="primary"
-            size="large"
-            style={styles.primaryButton}
-          />
-          
-          <Button
-            title="Torna alla Home"
-            onPress={handleBackToHome}
-            variant="secondary"
-            size="large"
-            style={styles.secondaryButton}
-          />
-        </View>
       </ScrollView>
-    </SafeAreaView>
+
+      {/* Fixed Action Buttons */}
+      <View style={styles.fixedButtonContainer}>
+        <Button
+          title="Nuova Partita"
+          onPress={handleNewGame}
+          variant="primary"
+          size="medium"
+          style={styles.primaryButton}
+        />
+        
+        <Button
+          title="Torna alla Home"
+          onPress={handleBackToHome}
+          variant="secondary"
+          size="medium"
+          style={styles.secondaryButton}
+        />
+      </View>
+    </View>
   );
 };
 
@@ -344,7 +347,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   },
   scrollContent: {
     padding: theme.spacing.lg,
-    paddingBottom: theme.spacing.xxl,
+    paddingBottom: theme.spacing.lg, // Reduced since buttons are now fixed
   },
   
   // Winner Section
@@ -578,12 +581,16 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     fontWeight: '500',
   },
   
-  // Action Buttons
-  actionButtons: {
+  // Fixed Action Buttons Container
+  fixedButtonContainer: {
+    backgroundColor: theme.colors.backgroundSecondary,
+    paddingHorizontal: theme.spacing.lg,
+    paddingTop: theme.spacing.md,
+    paddingBottom: theme.spacing.xl,
     gap: theme.spacing.md,
   },
   primaryButton: {
-    marginBottom: theme.spacing.sm,
+    // Additional styling if needed
   },
   secondaryButton: {
     // Additional styling if needed

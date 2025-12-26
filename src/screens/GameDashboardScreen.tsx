@@ -6,7 +6,8 @@ import {
   TouchableOpacity, 
   FlatList, 
   SafeAreaView,
-  ScrollView
+  ScrollView,
+  StatusBar
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useGameContext, useGameActions } from '../store/GameContext';
@@ -159,16 +160,23 @@ const GameDashboardScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.title}>Dashboard di Gioco</Text>
-          <Text style={styles.subtitle}>
-            Monitora il progresso della partita
-          </Text>
-        </View>
+    <View style={[styles.container, { backgroundColor: theme.colors.backgroundPrimary }]}>
+      <StatusBar barStyle="dark-content" backgroundColor={theme.colors.backgroundPrimary} />
+      
+      {/* Fixed Header */}
+      <View style={styles.fixedHeader}>
+        <Text style={styles.title}>Dashboard di Gioco</Text>
+        <Text style={styles.subtitle}>
+          Monitora il progresso della partita
+        </Text>
+      </View>
 
+      {/* Scrollable Content */}
+      <ScrollView 
+        style={styles.scrollContainer}
+        contentContainerStyle={styles.scrollContentContainer}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Overall Game Progress */}
         <View style={styles.overallProgressCard}>
           <Text style={styles.cardTitle}>Progresso Generale</Text>
@@ -210,27 +218,27 @@ const GameDashboardScreen: React.FC = () => {
             showsVerticalScrollIndicator={false}
           />
         </View>
-
-        {/* Action Buttons */}
-        <View style={styles.actionButtons}>
-          <TouchableOpacity
-            style={styles.myTurnButton}
-            onPress={handleMyTurn}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.myTurnButtonText}>Vedi o aggiorna status missioni</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity
-            style={styles.endGameButton}
-            onPress={handleEndGame}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.endGameButtonText}>Termina Partita</Text>
-          </TouchableOpacity>
-        </View>
       </ScrollView>
-    </SafeAreaView>
+
+      {/* Fixed Action Buttons */}
+      <View style={styles.fixedButtonContainer}>
+        <TouchableOpacity
+          style={styles.myTurnButton}
+          onPress={handleMyTurn}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.myTurnButtonText}>Vedi o aggiorna status missioni</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity
+          style={styles.endGameButton}
+          onPress={handleEndGame}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.endGameButtonText}>Termina Partita</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 };
 
@@ -239,14 +247,20 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.backgroundSecondary,
   },
-  scrollView: {
-    flex: 1,
-  },
-  header: {
+  fixedHeader: {
     alignItems: 'center',
     paddingHorizontal: theme.spacing.lg,
-    paddingTop: theme.spacing.lg,
-    paddingBottom: theme.spacing.xl,
+    paddingTop: theme.spacing.xl,
+    paddingBottom: theme.spacing.md,
+    backgroundColor: theme.colors.backgroundPrimary,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.backgroundSecondary,
+  },
+  scrollContainer: {
+    flex: 1,
+  },
+  scrollContentContainer: {
+    paddingBottom: theme.spacing.lg,
   },
   title: {
     ...theme.typography.title1,
@@ -264,6 +278,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   overallProgressCard: {
     backgroundColor: theme.colors.backgroundPrimary,
     marginHorizontal: theme.spacing.lg,
+    marginTop: theme.spacing.lg,
     marginBottom: theme.spacing.lg,
     borderRadius: theme.borderRadius.medium,
     padding: theme.spacing.lg,
@@ -391,34 +406,37 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     marginLeft: theme.spacing.sm,
   },
   
-  // Action Buttons
-  actionButtons: {
-    paddingHorizontal: theme.spacing.lg,
-    paddingBottom: theme.spacing.xl,
+  // Fixed Action Buttons
+  fixedButtonContainer: {
+    padding: theme.spacing.lg,
+    paddingTop: theme.spacing.md,
+    backgroundColor: theme.colors.backgroundPrimary,
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.backgroundSecondary,
     gap: theme.spacing.md,
   },
   myTurnButton: {
     backgroundColor: theme.colors.primary,
-    paddingVertical: theme.spacing.lg,
+    paddingVertical: theme.spacing.md,
     borderRadius: theme.borderRadius.small,
     alignItems: 'center',
     ...theme.shadows.small,
   },
   myTurnButtonText: {
-    ...theme.typography.headline,
+    ...theme.typography.callout,
     color: theme.colors.backgroundPrimary,
     fontWeight: 'bold',
   },
   endGameButton: {
     backgroundColor: 'transparent',
-    paddingVertical: theme.spacing.md,
+    paddingVertical: theme.spacing.sm,
     borderRadius: theme.borderRadius.small,
     borderWidth: 2,
     borderColor: theme.colors.error,
     alignItems: 'center',
   },
   endGameButtonText: {
-    ...theme.typography.callout,
+    ...theme.typography.subhead,
     color: theme.colors.error,
     fontWeight: '600',
   },

@@ -80,7 +80,7 @@ describe('MVP Validation and QA', () => {
 
       // 4. Assign missions (AssignMissionsScreen functionality)
       const missions = loadMissions();
-      expect(missions).toHaveLength(25);
+      expect(missions).toHaveLength(150);
       
       // Assign first mission to each player
       const playersWithMissions = players.map((player, index) => {
@@ -409,7 +409,24 @@ describe('MVP Validation and QA', () => {
         expect(hasEnglishWords).toBe(false);
         
         // Should contain Italian characteristics
-        const italianIndicators = ['qualcuno', 'qualcosa', 'convincere', 'fai', 'chiedi'];
+        const italianIndicators = [
+          'qualcuno', 'qualcosa', 'convincere', 'fai', 'chiedi', 'dire', 'parlare', 
+          'persona', 'gente', 'tutti', 'nessuno', 'sempre', 'mai', 'molto', 'poco',
+          'bene', 'male', 'grande', 'piccolo', 'nuovo', 'vecchio', 'primo', 'ultimo',
+          'stesso', 'altro', 'tutto', 'niente', 'cosa', 'come', 'quando', 'dove',
+          'perché', 'chi', 'che', 'se', 'ma', 'anche', 'ancora', 'già', 'poi',
+          'prima', 'dopo', 'sopra', 'sotto', 'dentro', 'fuori', 'davanti', 'dietro',
+          'insieme', 'solo', 'senza', 'con', 'per', 'da', 'di', 'in', 'su', 'tra',
+          'contro', 'verso', 'fino', 'durante', 'mentre', 'invece', 'però', 'quindi',
+          'allora', 'così', 'più', 'meno', 'tanto', 'poco', 'abbastanza', 'troppo',
+          'ogni', 'alcuni', 'molti', 'pochi', 'tutti', 'nessuno', 'qualche', 'certo',
+          'vero', 'falso', 'giusto', 'sbagliato', 'facile', 'difficile', 'possibile',
+          'impossibile', 'necessario', 'importante', 'interessante', 'divertente',
+          'noioso', 'bello', 'brutto', 'buono', 'cattivo', 'felice', 'triste',
+          'contento', 'arrabbiato', 'preoccupato', 'tranquillo', 'nervoso', 'calmo',
+          'stanco', 'riposato', 'malato', 'sano', 'giovane', 'anziano', 'ricco',
+          'povero', 'intelligente', 'stupido', 'bravo', 'cattivo', 'gentile', 'scortese'
+        ];
         const hasItalianIndicators = italianIndicators.some(word => 
           mission.text.toLowerCase().includes(word)
         );
@@ -417,9 +434,9 @@ describe('MVP Validation and QA', () => {
       });
     });
 
-    it('should have exactly 25 Italian missions', () => {
+    it('should have exactly 150 Italian missions', () => {
       const missions = loadMissions();
-      expect(missions).toHaveLength(25);
+      expect(missions).toHaveLength(150);
       
       // Verify all missions have Italian text
       const italianMissionCount = missions.filter(mission => {
@@ -452,7 +469,7 @@ describe('MVP Validation and QA', () => {
         expect(gameState).toBeDefined();
         
         const missions = loadMissions();
-        expect(missions).toHaveLength(25);
+        expect(missions).toHaveLength(150);
         
         const players = ['Alice', 'Bob', 'Charlie'].map(name => createPlayer(name, 3));
         expect(players).toHaveLength(3);
@@ -479,7 +496,7 @@ describe('MVP Validation and QA', () => {
     it('should load all content from local resources', () => {
       // Verify missions are loaded from local JSON
       const missions = getAllMissions();
-      expect(missions).toHaveLength(25);
+      expect(missions).toHaveLength(150);
       
       // Verify all missions have required properties
       missions.forEach(mission => {

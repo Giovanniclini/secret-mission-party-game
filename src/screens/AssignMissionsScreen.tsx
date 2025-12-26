@@ -4,9 +4,9 @@ import {
   Text, 
   StyleSheet, 
   ScrollView,
-  Alert
+  Alert,
+  StatusBar
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useGameContext, useGameActions } from '../store/GameContext';
 import { GameStatus, DifficultyLevel, DifficultyMode, Mission } from '../models';
@@ -225,8 +225,15 @@ const AssignMissionsScreen: React.FC = () => {
 
   if (currentPhase === AssignmentPhase.INTRO) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.content}>
+      <View style={[styles.container, { backgroundColor: theme.colors.backgroundPrimary }]}>
+        <StatusBar barStyle="dark-content" backgroundColor={theme.colors.backgroundPrimary} />
+        
+        {/* Scrollable Content */}
+        <ScrollView 
+          style={styles.scrollContainer}
+          contentContainerStyle={styles.scrollContentContainer}
+          showsVerticalScrollIndicator={false}
+        >
           <View style={styles.header}>
             <Text style={styles.title}>Assegnazione Missioni</Text>
             <Text style={styles.subtitle}>
@@ -238,7 +245,7 @@ const AssignMissionsScreen: React.FC = () => {
             <Text style={styles.instructionsTitle}>Come Funziona</Text>
             <View style={styles.instructionsList}>
               <Text style={styles.instructionItem}>
-                • Premendo "Inizia Assegnazione" verranno assegnate tutte le missioni
+                • Premendo &ldquo;Inizia Assegnazione&rdquo; verranno assegnate tutte le missioni
               </Text>
               <Text style={styles.instructionItem}>
                 • Ogni giocatore vedrà le proprie missioni in privato
@@ -266,28 +273,31 @@ const AssignMissionsScreen: React.FC = () => {
               Modalità: {isMixedMode ? 'Difficoltà Mista' : `Difficoltà ${getDifficultyLabel(uniformDifficulty!)}`}
             </Text>
           </View>
-          
-          <View style={styles.actions}>
-            <Button
-              title="Inizia Assegnazione"
-              onPress={handleStartAssignment}
-              variant="primary"
-              size="large"
-            />
-          </View>
+        </ScrollView>
+
+        {/* Fixed Button */}
+        <View style={styles.fixedButtonContainer}>
+          <Button
+            title="Inizia Assegnazione"
+            onPress={handleStartAssignment}
+            variant="primary"
+            size="large"
+            style={styles.startButton}
+          />
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
   if (currentPhase === AssignmentPhase.MISSION_REVEAL) {
     if (!currentMission || !selectedDifficulty) {
       return (
-        <SafeAreaView style={styles.container}>
+        <View style={[styles.container, { backgroundColor: theme.colors.backgroundPrimary }]}>
+          <StatusBar barStyle="dark-content" backgroundColor={theme.colors.backgroundPrimary} />
           <View style={styles.content}>
             <Text style={styles.errorText}>Errore nel caricamento della missione</Text>
           </View>
-        </SafeAreaView>
+        </View>
       );
     }
 
@@ -303,7 +313,8 @@ const AssignMissionsScreen: React.FC = () => {
     }
 
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={[styles.container, { backgroundColor: theme.colors.backgroundPrimary }]}>
+        <StatusBar barStyle="dark-content" backgroundColor={theme.colors.backgroundPrimary} />
         <View style={styles.revealContainer}>
           <View style={styles.revealHeader}>
             <Text style={styles.revealTitle}>
@@ -348,13 +359,14 @@ const AssignMissionsScreen: React.FC = () => {
             />
           </View>
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
   if (currentPhase === AssignmentPhase.COMPLETED) {
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={[styles.container, { backgroundColor: theme.colors.backgroundPrimary }]}>
+        <StatusBar barStyle="dark-content" backgroundColor={theme.colors.backgroundPrimary} />
         <View style={styles.content}>
           <View style={styles.header}>
             <Text style={styles.title}>Missioni Assegnate</Text>
@@ -376,7 +388,7 @@ const AssignMissionsScreen: React.FC = () => {
             Reindirizzamento alla dashboard di gioco...
           </Text>
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
@@ -388,6 +400,13 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.backgroundSecondary,
   },
+  scrollContainer: {
+    flex: 1,
+  },
+  scrollContentContainer: {
+    padding: theme.spacing.lg,
+    paddingBottom: theme.spacing.lg,
+  },
   content: {
     flex: 1,
     padding: theme.spacing.lg,
@@ -395,7 +414,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    marginTop: theme.spacing.xl,
+    marginTop: theme.spacing.sm,
   },
   title: {
     ...theme.typography.title1,
@@ -444,8 +463,15 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     color: theme.colors.textSecondary,
     textAlign: 'center',
   },
-  actions: {
-    paddingBottom: theme.spacing.lg,
+  fixedButtonContainer: {
+    padding: theme.spacing.lg,
+    paddingTop: theme.spacing.md,
+    backgroundColor: theme.colors.backgroundPrimary,
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.backgroundSecondary,
+  },
+  startButton: {
+    width: '100%',
   },
   
   // Mission Reveal Styles

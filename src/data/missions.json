@@ -1,154 +1,168 @@
 {
   "missions": [
-    {
-      "id": "1",
-      "text": "Fai ridere qualcuno senza che se ne accorga",
-      "difficulty": "EASY",
-      "points": 1
-    },
-    {
-      "id": "2",
-      "text": "Convincere qualcuno a offrirti qualcosa da bere",
-      "difficulty": "MEDIUM",
-      "points": 2
-    },
-    {
-      "id": "3",
-      "text": "Fai un complimento a qualcuno sui suoi vestiti",
-      "difficulty": "EASY",
-      "points": 1
-    },
-    {
-      "id": "4",
-      "text": "Chiedi a qualcuno di raccontarti una barzelletta",
-      "difficulty": "EASY",
-      "points": 1
-    },
-    {
-      "id": "5",
-      "text": "Convincere qualcuno a cantare una canzone",
-      "difficulty": "HARD",
-      "points": 3
-    },
-    {
-      "id": "6",
-      "text": "Fai dire a qualcuno la parola 'banana' in una conversazione",
-      "difficulty": "MEDIUM",
-      "points": 2
-    },
-    {
-      "id": "7",
-      "text": "Ottieni un high-five da qualcuno",
-      "difficulty": "EASY",
-      "points": 1
-    },
-    {
-      "id": "8",
-      "text": "Convincere qualcuno a condividere un ricordo d'infanzia",
-      "difficulty": "MEDIUM",
-      "points": 2
-    },
-    {
-      "id": "9",
-      "text": "Fai dire a qualcuno il nome del suo animale domestico",
-      "difficulty": "EASY",
-      "points": 1
-    },
-    {
-      "id": "10",
-      "text": "Convincere qualcuno a imitare un animale",
-      "difficulty": "HARD",
-      "points": 3
-    },
-    {
-      "id": "11",
-      "text": "Fai dire a qualcuno qual è il suo cibo preferito",
-      "difficulty": "EASY",
-      "points": 1
-    },
-    {
-      "id": "12",
-      "text": "Ottieni un abbraccio da qualcuno",
-      "difficulty": "MEDIUM",
-      "points": 2
-    },
-    {
-      "id": "13",
-      "text": "Convincere qualcuno a ballare per 10 secondi",
-      "difficulty": "HARD",
-      "points": 3
-    },
-    {
-      "id": "14",
-      "text": "Fai dire a qualcuno il nome della sua città natale",
-      "difficulty": "EASY",
-      "points": 1
-    },
-    {
-      "id": "15",
-      "text": "Convincere qualcuno a raccontare una storia imbarazzante",
-      "difficulty": "HARD",
-      "points": 3
-    },
-    {
-      "id": "16",
-      "text": "Fai dire a qualcuno qual è il suo colore preferito",
-      "difficulty": "EASY",
-      "points": 1
-    },
-    {
-      "id": "17",
-      "text": "Convincere qualcuno a fare una foto insieme",
-      "difficulty": "MEDIUM",
-      "points": 2
-    },
-    {
-      "id": "18",
-      "text": "Fai dire a qualcuno il titolo del suo film preferito",
-      "difficulty": "EASY",
-      "points": 1
-    },
-    {
-      "id": "19",
-      "text": "Convincere qualcuno a fare un'imitazione di una celebrità",
-      "difficulty": "HARD",
-      "points": 3
-    },
-    {
-      "id": "20",
-      "text": "Fai dire a qualcuno qual è il suo hobby preferito",
-      "difficulty": "EASY",
-      "points": 1
-    },
-    {
-      "id": "21",
-      "text": "Convincere qualcuno a raccontare una barzelletta",
-      "difficulty": "MEDIUM",
-      "points": 2
-    },
-    {
-      "id": "22",
-      "text": "Fai dire a qualcuno il nome del suo cantante preferito",
-      "difficulty": "EASY",
-      "points": 1
-    },
-    {
-      "id": "23",
-      "text": "Convincere qualcuno a fare un gioco di parole",
-      "difficulty": "MEDIUM",
-      "points": 2
-    },
-    {
-      "id": "24",
-      "text": "Fai dire a qualcuno qual è la sua stagione preferita",
-      "difficulty": "EASY",
-      "points": 1
-    },
-    {
-      "id": "25",
-      "text": "Convincere qualcuno a raccontare il suo sogno più strano",
-      "difficulty": "HARD",
-      "points": 3
-    }
+    { "id": "1", "text": "Fai dire a qualcuno la parola \"ok\".", "difficulty": "EASY", "points": 1 },
+    { "id": "2", "text": "Fai sorridere una persona.", "difficulty": "EASY", "points": 1 },
+    { "id": "3", "text": "Fai un brindisi spontaneo.", "difficulty": "EASY", "points": 1 },
+    { "id": "4", "text": "Chiedi a qualcuno come sta.", "difficulty": "EASY", "points": 1 },
+    { "id": "5", "text": "Ottieni un \"sì\" come risposta a una domanda.", "difficulty": "EASY", "points": 1 },
+    { "id": "6", "text": "Fai un complimento sincero a qualcuno.", "difficulty": "EASY", "points": 1 },
+    { "id": "7", "text": "Fai annuire una persona mentre parlate.", "difficulty": "EASY", "points": 1 },
+    { "id": "8", "text": "Chiedi a qualcuno che musica gli piace.", "difficulty": "EASY", "points": 1 },
+    { "id": "9", "text": "Fai dire a qualcuno \"hai ragione\".", "difficulty": "EASY", "points": 1 },
+    { "id": "10", "text": "Fai notare qualcosa di positivo nella stanza.", "difficulty": "EASY", "points": 1 },
+
+    { "id": "11", "text": "Avvia una conversazione su un film.", "difficulty": "EASY", "points": 1 },
+    { "id": "12", "text": "Fai ridere qualcuno con una battuta semplice.", "difficulty": "EASY", "points": 1 },
+    { "id": "13", "text": "Chiedi a qualcuno se vuole bere qualcosa.", "difficulty": "EASY", "points": 1 },
+    { "id": "14", "text": "Fai dire a qualcuno \"che bello\".", "difficulty": "EASY", "points": 1 },
+    { "id": "15", "text": "Chiedi a qualcuno come si chiama (anche se lo sai).", "difficulty": "EASY", "points": 1 },
+    { "id": "16", "text": "Fai parlare qualcuno per almeno 10 secondi.", "difficulty": "EASY", "points": 1 },
+    { "id": "17", "text": "Chiedi a qualcuno da dove viene.", "difficulty": "EASY", "points": 1 },
+    { "id": "18", "text": "Fai dire a qualcuno \"davvero?\".", "difficulty": "EASY", "points": 1 },
+    { "id": "19", "text": "Fai una domanda sul cibo.", "difficulty": "EASY", "points": 1 },
+    { "id": "20", "text": "Fai commentare il tempo a qualcuno.", "difficulty": "EASY", "points": 1 },
+
+    { "id": "21", "text": "Fai dire a qualcuno \"non lo sapevo\".", "difficulty": "EASY", "points": 1 },
+    { "id": "22", "text": "Coinvolgi qualcuno in una conversazione innocua.", "difficulty": "EASY", "points": 1 },
+    { "id": "23", "text": "Fai una battuta autoironica.", "difficulty": "EASY", "points": 1 },
+    { "id": "24", "text": "Fai dire a qualcuno \"forse\".", "difficulty": "EASY", "points": 1 },
+    { "id": "25", "text": "Chiedi un consiglio semplice.", "difficulty": "EASY", "points": 1 },
+    { "id": "26", "text": "Fai dire a qualcuno \"che dici?\".", "difficulty": "EASY", "points": 1 },
+    { "id": "27", "text": "Fai raccontare un piccolo ricordo.", "difficulty": "EASY", "points": 1 },
+    { "id": "28", "text": "Chiedi se qualcuno si sta divertendo.", "difficulty": "EASY", "points": 1 },
+    { "id": "29", "text": "Fai dire a qualcuno \"ah ok\".", "difficulty": "EASY", "points": 1 },
+    { "id": "30", "text": "Fai una domanda a risposta chiusa.", "difficulty": "EASY", "points": 1 },
+
+    { "id": "31", "text": "Fai notare un dettaglio nella stanza.", "difficulty": "EASY", "points": 1 },
+    { "id": "32", "text": "Fai dire a qualcuno \"ci sta\".", "difficulty": "EASY", "points": 1 },
+    { "id": "33", "text": "Avvia una conversazione sul weekend.", "difficulty": "EASY", "points": 1 },
+    { "id": "34", "text": "Fai dire a qualcuno \"esatto\".", "difficulty": "EASY", "points": 1 },
+    { "id": "35", "text": "Chiedi a qualcuno che ore sono.", "difficulty": "EASY", "points": 1 },
+    { "id": "36", "text": "Fai commentare il cibo.", "difficulty": "EASY", "points": 1 },
+    { "id": "37", "text": "Fai dire a qualcuno \"mah\".", "difficulty": "EASY", "points": 1 },
+    { "id": "38", "text": "Chiedi se qualcuno ha fame.", "difficulty": "EASY", "points": 1 },
+    { "id": "39", "text": "Fai ridere almeno una persona.", "difficulty": "EASY", "points": 1 },
+    { "id": "40", "text": "Chiedi se qualcuno ha visto una serie TV.", "difficulty": "EASY", "points": 1 },
+
+    { "id": "41", "text": "Fai dire a qualcuno \"capito\".", "difficulty": "EASY", "points": 1 },
+    { "id": "42", "text": "Fai parlare qualcuno di sé.", "difficulty": "EASY", "points": 1 },
+    { "id": "43", "text": "Chiedi a qualcuno cosa beve.", "difficulty": "EASY", "points": 1 },
+    { "id": "44", "text": "Fai un commento positivo sulla serata.", "difficulty": "EASY", "points": 1 },
+    { "id": "45", "text": "Fai dire a qualcuno \"interessante\".", "difficulty": "EASY", "points": 1 },
+    { "id": "46", "text": "Chiedi se qualcuno vuole sedersi.", "difficulty": "EASY", "points": 1 },
+    { "id": "47", "text": "Avvia una conversazione su lavoro o studio.", "difficulty": "EASY", "points": 1 },
+    { "id": "48", "text": "Fai dire a qualcuno \"già\".", "difficulty": "EASY", "points": 1 },
+    { "id": "49", "text": "Chiedi se qualcuno conosce qualcun altro lì.", "difficulty": "EASY", "points": 1 },
+    { "id": "50", "text": "Fai dire a qualcuno \"che storia\".", "difficulty": "EASY", "points": 1 },
+
+    { "id": "51", "text": "Fai dire a qualcuno il tuo nome.", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "52", "text": "Convincere qualcuno a fare un brindisi con te.", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "53", "text": "Fai cambiare posto a una persona.", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "54", "text": "Fai raccontare una storia divertente.", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "55", "text": "Avvia una conversazione di gruppo.", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "56", "text": "Fai ridere due persone insieme.", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "57", "text": "Fai parlare qualcuno per almeno 30 secondi.", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "58", "text": "Coinvolgi almeno tre persone in una conversazione.", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "59", "text": "Fai dire a qualcuno \"non me l'aspettavo\".", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "60", "text": "Fai proporre a qualcuno un gioco.", "difficulty": "MEDIUM", "points": 2 },
+
+    { "id": "61", "text": "Fai raccontare un aneddoto.", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "62", "text": "Fai partire una discussione innocua.", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "63", "text": "Fai dire a qualcuno \"ma dai\".", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "64", "text": "Fai commentare una canzone.", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "65", "text": "Convincere qualcuno a sedersi vicino a te.", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "66", "text": "Fai dire a qualcuno \"questa è bella\".", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "67", "text": "Fai parlare qualcuno del passato.", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "68", "text": "Fai cambiare argomento a una conversazione.", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "69", "text": "Fai dire a qualcuno \"ok, ci sto\".", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "70", "text": "Fai coinvolgere qualcuno in una decisione.", "difficulty": "MEDIUM", "points": 2 },
+
+    { "id": "71", "text": "Fai raccontare un ricordo divertente.", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "72", "text": "Fai dire a qualcuno \"questa è nuova\".", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "73", "text": "Fai chiedere un'opinione al gruppo.", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "74", "text": "Fai dire a qualcuno \"non è vero\".", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "75", "text": "Fai partire una conversazione su un viaggio.", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "76", "text": "Fai dire a qualcuno \"questa è difficile\".", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "77", "text": "Fai parlare qualcuno di un hobby.", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "78", "text": "Fai dire a qualcuno \"questa è interessante\".", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "79", "text": "Fai raccontare una storia d'infanzia.", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "80", "text": "Fai coinvolgere due persone che non parlavano.", "difficulty": "MEDIUM", "points": 2 },
+
+    { "id": "81", "text": "Fai dire a qualcuno \"non ci credo\".", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "82", "text": "Fai proporre qualcosa al gruppo.", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "83", "text": "Fai dire a qualcuno \"questa la so\".", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "84", "text": "Fai raccontare una storia un po' lunga.", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "85", "text": "Fai dire a qualcuno \"questa è una bella idea\".", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "86", "text": "Fai coinvolgere almeno quattro persone.", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "87", "text": "Fai dire a qualcuno \"questa è forte\".", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "88", "text": "Convincere qualcuno a raccontare qualcosa.", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "89", "text": "Fai dire a qualcuno \"non me l'aspettavo davvero\".", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "90", "text": "Fai partire una conversazione sul cibo preferito.", "difficulty": "MEDIUM", "points": 2 },
+
+    { "id": "91", "text": "Fai dire a qualcuno \"questa è lunga\".", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "92", "text": "Fai chiedere un consiglio al gruppo.", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "93", "text": "Fai dire a qualcuno \"questa la rifarei\".", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "94", "text": "Fai raccontare una storia che coinvolge due persone.", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "95", "text": "Fai dire a qualcuno \"questa è strana\".", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "96", "text": "Fai coinvolgere qualcuno che parlava poco.", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "97", "text": "Fai dire a qualcuno \"questa è diversa\".", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "98", "text": "Fai partire una conversazione che cresce.", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "99", "text": "Fai dire a qualcuno \"questa non la sapevo\".", "difficulty": "MEDIUM", "points": 2 },
+    { "id": "100", "text": "Fai notare qualcosa che nessuno aveva notato.", "difficulty": "MEDIUM", "points": 2 },
+
+    { "id": "101", "text": "Fai ridere tutto il gruppo contemporaneamente.", "difficulty": "HARD", "points": 3 },
+    { "id": "102", "text": "Fai raccontare una storia davanti a tutti.", "difficulty": "HARD", "points": 3 },
+    { "id": "103", "text": "Fai parlare qualcuno per almeno un minuto.", "difficulty": "HARD", "points": 3 },
+    { "id": "104", "text": "Fai iniziare un applauso spontaneo.", "difficulty": "HARD", "points": 3 },
+    { "id": "105", "text": "Coinvolgi tutto il gruppo in una decisione.", "difficulty": "HARD", "points": 3 },
+    { "id": "106", "text": "Fai raccontare una storia che fa ridere tutti.", "difficulty": "HARD", "points": 3 },
+    { "id": "107", "text": "Convincere qualcuno a raccontare una figuraccia leggera.", "difficulty": "HARD", "points": 3 },
+    { "id": "108", "text": "Fai partire una conversazione che dura almeno cinque minuti.", "difficulty": "HARD", "points": 3 },
+    { "id": "109", "text": "Fai raccontare una storia senza usare la parola \"io\".", "difficulty": "HARD", "points": 3 },
+    { "id": "110", "text": "Fai chiudere una conversazione con una risata generale.", "difficulty": "HARD", "points": 3 },
+
+    { "id": "111", "text": "Fai dire a qualcuno \"ok, lo ammetto\".", "difficulty": "HARD", "points": 3 },
+    { "id": "112", "text": "Fai coinvolgere almeno cinque persone.", "difficulty": "HARD", "points": 3 },
+    { "id": "113", "text": "Fai raccontare una storia che inizia con \"una volta...\".", "difficulty": "HARD", "points": 3 },
+    { "id": "114", "text": "Fai dire a qualcuno \"questa è assurda\".", "difficulty": "HARD", "points": 3 },
+    { "id": "115", "text": "Convincere qualcuno a cambiare opinione davanti al gruppo.", "difficulty": "HARD", "points": 3 },
+    { "id": "116", "text": "Fai raccontare un segreto innocuo.", "difficulty": "HARD", "points": 3 },
+    { "id": "117", "text": "Fai dire a qualcuno \"questa è epica\".", "difficulty": "HARD", "points": 3 },
+    { "id": "118", "text": "Fai partire una discussione che coinvolge tutti.", "difficulty": "HARD", "points": 3 },
+    { "id": "119", "text": "Fai raccontare una storia con un colpo di scena.", "difficulty": "HARD", "points": 3 },
+    { "id": "120", "text": "Fai dire a qualcuno \"questa non la dimentico\".", "difficulty": "HARD", "points": 3 },
+
+    { "id": "121", "text": "Fai coinvolgere due persone che non si parlavano.", "difficulty": "HARD", "points": 3 },
+    { "id": "122", "text": "Fai raccontare una storia lunga senza essere interrotto.", "difficulty": "HARD", "points": 3 },
+    { "id": "123", "text": "Fai dire a qualcuno \"questa è geniale\".", "difficulty": "HARD", "points": 3 },
+    { "id": "124", "text": "Fai coinvolgere tutto il gruppo in un gioco improvvisato.", "difficulty": "HARD", "points": 3 },
+    { "id": "125", "text": "Fai dire a qualcuno \"questa è la verità\".", "difficulty": "HARD", "points": 3 },
+    { "id": "126", "text": "Convincere qualcuno a raccontare un ricordo lontano.", "difficulty": "HARD", "points": 3 },
+    { "id": "127", "text": "Fai dire a qualcuno \"questa è incredibile\".", "difficulty": "HARD", "points": 3 },
+    { "id": "128", "text": "Fai partire un applauso collettivo.", "difficulty": "HARD", "points": 3 },
+    { "id": "129", "text": "Fai raccontare una storia senza nominare nomi.", "difficulty": "HARD", "points": 3 },
+    { "id": "130", "text": "Fai dire a qualcuno \"questa è una follia\".", "difficulty": "HARD", "points": 3 },
+
+    { "id": "131", "text": "Fai coinvolgere il gruppo in una proposta.", "difficulty": "HARD", "points": 3 },
+    { "id": "132", "text": "Fai raccontare una storia buffa a qualcuno molto serio.", "difficulty": "HARD", "points": 3 },
+    { "id": "133", "text": "Fai dire a qualcuno \"questa è una bomba\".", "difficulty": "HARD", "points": 3 },
+    { "id": "134", "text": "Fai partire una conversazione che tutti seguono.", "difficulty": "HARD", "points": 3 },
+    { "id": "135", "text": "Fai raccontare una storia che fa ridere tutti.", "difficulty": "HARD", "points": 3 },
+    { "id": "136", "text": "Fai dire a qualcuno \"questa è difficile da spiegare\".", "difficulty": "HARD", "points": 3 },
+    { "id": "137", "text": "Convincere qualcuno a raccontare qualcosa di personale (leggero).", "difficulty": "HARD", "points": 3 },
+    { "id": "138", "text": "Fai dire a qualcuno \"questa è pazzesca\".", "difficulty": "HARD", "points": 3 },
+    { "id": "139", "text": "Fai coinvolgere almeno sei persone.", "difficulty": "HARD", "points": 3 },
+    { "id": "140", "text": "Fai raccontare una storia che sorprende tutti.", "difficulty": "HARD", "points": 3 },
+
+    { "id": "141", "text": "Fai dire a qualcuno \"questa è una rivelazione\".", "difficulty": "HARD", "points": 3 },
+    { "id": "142", "text": "Fai partire una conversazione memorabile.", "difficulty": "HARD", "points": 3 },
+    { "id": "143", "text": "Fai raccontare una storia che finisce con una risata.", "difficulty": "HARD", "points": 3 },
+    { "id": "144", "text": "Fai dire a qualcuno \"questa è la cosa più strana\".", "difficulty": "HARD", "points": 3 },
+    { "id": "145", "text": "Convincere qualcuno a fare una proposta pubblica.", "difficulty": "HARD", "points": 3 },
+    { "id": "146", "text": "Fai coinvolgere tutto il gruppo in una scelta.", "difficulty": "HARD", "points": 3 },
+    { "id": "147", "text": "Fai dire a qualcuno \"questa è una confessione\".", "difficulty": "HARD", "points": 3 },
+    { "id": "148", "text": "Fai raccontare una storia che tutti ascoltano.", "difficulty": "HARD", "points": 3 },
+    { "id": "149", "text": "Fai dire a qualcuno \"questa è pazzesca davvero\".", "difficulty": "HARD", "points": 3 },
+    { "id": "150", "text": "Fai chiudere la serata con una risata generale.", "difficulty": "HARD", "points": 3 }
   ]
 }
