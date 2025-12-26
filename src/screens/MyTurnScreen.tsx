@@ -17,7 +17,6 @@ import {
   Player, 
   MissionState, 
   DifficultyLevel, 
-  canGameEnd,
   getDifficultyPoints
 } from '../models';
 import { useErrorHandler } from '../hooks/useErrorHandler';
@@ -102,15 +101,6 @@ const MyTurnScreen: React.FC = () => {
               setShowMissions(false);
               setSelectedPlayer(null);
               setSelectedMissionIndex(0);
-              
-              // Check if game can end
-              if (canGameEnd(gameState.players)) {
-                Alert.alert(
-                  'Gioco Completabile',
-                  'Almeno un giocatore ha completato tutte le sue missioni. Il game master può terminare il gioco dalla Dashboard.',
-                  [{ text: 'OK' }]
-                );
-              }
             }
           }
         ]
