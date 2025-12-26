@@ -5,7 +5,6 @@ import {
   StyleSheet, 
   TouchableOpacity, 
   FlatList, 
-  SafeAreaView,
   ScrollView,
   StatusBar
 } from 'react-native';
@@ -110,7 +109,8 @@ const GameDashboardScreen: React.FC = () => {
   const rankedPlayers = getSortedPlayersByRanking();
 
   const renderPlayerCard = ({ item: player, index }: { item: Player; index: number }) => {
-    const remainingMissions = Math.max(0, player.targetMissionCount - player.completedMissions);
+    const remainingMissions = player.missions.filter(pm => pm.state === MissionState.ACTIVE).length;
+    const discoveredMissions = player.missions.filter(pm => pm.state === MissionState.CAUGHT).length;
     const avgCompletionTime = calculateAverageCompletionTime(player);
     const currentMission = player.missions.find(pm => pm.state === MissionState.ACTIVE);
     
@@ -131,6 +131,13 @@ const GameDashboardScreen: React.FC = () => {
             <Text style={styles.progressLabel}>Missioni completate:</Text>
             <Text style={styles.progressValue}>
               {player.completedMissions}/{player.targetMissionCount}
+            </Text>
+          </View>
+          
+          <View style={styles.progressRow}>
+            <Text style={styles.progressLabel}>Missioni scoperte:</Text>
+            <Text style={styles.progressValue}>
+              {discoveredMissions}/{player.targetMissionCount}
             </Text>
           </View>
           

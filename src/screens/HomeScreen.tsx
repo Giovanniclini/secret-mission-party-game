@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, Alert, Image, StatusBar } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useGameContext, useGameActions } from '../store/GameContext';
@@ -9,6 +9,7 @@ import { ErrorNotification } from '../components/ErrorNotification';
 import { withErrorBoundary } from '../components/ErrorBoundary';
 import { Button } from '../components/ui/Button';
 import { useTheme } from '../theme/ThemeProvider';
+import GameRulesModal from '../components/GameRulesModal';
 
 const HomeScreen: React.FC = () => {
   const router = useRouter();
@@ -16,6 +17,7 @@ const HomeScreen: React.FC = () => {
   const { createGame } = useGameActions();
   const { error, clearError, handleAsyncError } = useErrorHandler();
   const theme = useTheme();
+  const [showRulesModal, setShowRulesModal] = useState(false);
 
   // Check if there's a game in progress that can be resumed
   const gameCanBeResumed = canResumeGame(gameState);
@@ -128,6 +130,14 @@ const HomeScreen: React.FC = () => {
             style={styles.secondaryButton}
           />
         )}
+        
+        <Button
+          title="Regole del Gioco"
+          onPress={() => setShowRulesModal(true)}
+          variant="secondary"
+          size="medium"
+          style={styles.rulesButton}
+        />
       </View>
 
       {/* Game Info Section */}
@@ -144,6 +154,12 @@ const HomeScreen: React.FC = () => {
       
       {/* Subtle Background Elements */}
       <View style={[styles.backgroundElement, { backgroundColor: theme.colors.backgroundSecondary }]} />
+      
+      {/* Game Rules Modal */}
+      <GameRulesModal
+        visible={showRulesModal}
+        onClose={() => setShowRulesModal(false)}
+      />
     </View>
   );
 };
@@ -207,6 +223,10 @@ const styles = StyleSheet.create({
   },
   secondaryButton: {
     width: '100%',
+  },
+  rulesButton: {
+    width: '100%',
+    marginTop: 8,
   },
   gameInfoContainer: {
     paddingHorizontal: 20,
