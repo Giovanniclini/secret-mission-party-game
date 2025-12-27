@@ -1,26 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   View, 
   Text, 
   StyleSheet, 
   ScrollView,
   Alert,
-  StatusBar
+  StatusBar,
+  TouchableOpacity
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useGameContext, useGameActions } from '../store/GameContext';
 import { GameStatus, DifficultyLevel, DifficultyMode, Mission } from '../models';
 import { 
   getRandomAvailableMissionByDifficulty,
-  getRandomAvailableMission
+  hasEnoughMissions,
+  getMissionCountByDifficulty,
+  getTotalMissionCount
 } from '../data/missions';
 import SecureReveal from '../components/SecureReveal';
 import { Button } from '../components/ui/Button';
 import { useTheme } from '../theme';
-import { getAllUsedMissionIds } from '../data/missionUtils';
 
 enum AssignmentPhase {
   INTRO = 'INTRO',
+  DIFFICULTY_SELECTION = 'DIFFICULTY_SELECTION',
   MISSION_REVEAL = 'MISSION_REVEAL',
   COMPLETED = 'COMPLETED'
 }
@@ -65,153 +68,9 @@ const AssignMissionsScreen: React.FC = () => {
   const [selectedDifficulty, setSelectedDifficulty] = useState<DifficultyLevel | null>(null);
   const [currentMission, setCurrentMission] = useState<Mission | null>(null);
 
-  // Set up the first mission when we enter MISSION_REVEAL phase
-  useEffect(() => {
-    if (currentPhase === AssignmentPhase.MISSION_REVEAL && !currentMission) {
-      const player = gameState.players[currentPlayerIndex];
-      if (player) {
-        // Get the mission at the current index for the current player
-        const playerMissions = player.missions;
-        if (playerMissions.length > currentMissionIndex) {
-          const missionToReveal = playerMissions[currentMissionIndex];
-          
-          if (missionToReveal) {
-            setCurrentMission(missionToReveal.mission);
-            setSelectedDifficulty(missionToReveal.mission.difficulty);
-          }
-        }
-      }
-    }
-  }, [currentPhase, currentMission, currentMissionIndex, currentPlayerIndex, gameState.players]);
-
-  // Don't update game status here - it should already be ASSIGNING from SetupPlayersScreen
-  useEffect(() => {
-    // No status updates needed - just validate we're in the right state
-    if (gameState.status !== GameStatus.ASSIGNING && gameState.status !== GameStatus.CONFIGURING) {
-      console.warn('AssignMissionsScreen loaded with unexpected status:', gameState.status);
-    }
-  }, []); // Empty dependency array - only run once on mount
-
-  // CLEAN LOGIC: Calculate current state based on game state
-  const currentPlayer = gameState.players[currentPlayerIndex];
-  const currentPlayerTargetMissions = currentPlayer?.targetMissionCount || gameState.configuration.missionsPerPlayer;
-  
-  // For mission reveal, show which mission number we're currently revealing (1-based)
-  const currentMissionNumber = currentMissionIndex + 1;
-  
-  // Check if all players have completed their assignments (all have their target number of missions)
-  const allPlayersComplete = gameState.players.every(player => 
-    player.missions.length >= player.targetMissionCount
-  );
-  
+  // Calculate configuration values early to avoid hoisting issues
   const isMixedMode = gameState.configuration.difficultyMode === DifficultyMode.MIXED;
   const uniformDifficulty = gameState.configuration.uniformDifficulty;
-
-  const styles = createStyles(theme);
-
-  const handleStartAssignment = () => {
-    if (gameState.players.length === 0) {
-      Alert.alert('Errore', 'Nessun giocatore trovato');
-      return;
-    }
-    
-    // Assign ALL missions to ALL players at once
-    assignAllMissionsToAllPlayers();
-    
-    // Start with the first player's first mission
-    setCurrentPlayerIndex(0);
-    setCurrentMissionIndex(0);
-    setCurrentPhase(AssignmentPhase.MISSION_REVEAL);
-  };
-
-  const assignAllMissionsToAllPlayers = () => {
-    const usedMissionIds: string[] = [];
-    
-    // For each player, assign all their missions
-    gameState.players.forEach(player => {
-      for (let missionIndex = 0; missionIndex < player.targetMissionCount; missionIndex++) {
-        let mission: Mission | null = null;
-        let difficulty: DifficultyLevel;
-        
-        if (isMixedMode) {
-          // In mixed mode, assign with medium difficulty by default
-          // Players can see the difficulty when the mission is revealed
-          difficulty = DifficultyLevel.MEDIUM;
-          mission = getRandomAvailableMissionByDifficulty(difficulty, usedMissionIds);
-        } else if (uniformDifficulty) {
-          // In uniform mode, use the configured difficulty
-          difficulty = uniformDifficulty;
-          mission = getRandomAvailableMissionByDifficulty(difficulty, usedMissionIds);
-        } else {
-          // Fallback to random mission
-          difficulty = DifficultyLevel.MEDIUM;
-          mission = getRandomAvailableMission(usedMissionIds);
-        }
-
-        if (mission) {
-          // Add to used missions to avoid duplicates
-          usedMissionIds.push(mission.id);
-          
-          // Assign the mission to the player
-          assignMissionWithDifficulty(player.id, mission, difficulty);
-        }
-      }
-    });
-  };
-
-  const handleMissionRevealStart = () => {
-    // Missions are already assigned and activated when the assignment started
-    // This function is called when the mission is first shown to the player
-  };
-
-  const handleMissionContinue = () => {
-    if (!currentPlayer) {
-      Alert.alert('Errore', 'Giocatore non trovato');
-      return;
-    }
-    
-    const playerMissions = currentPlayer.missions;
-    
-    // Check if current player has more missions to reveal
-    if (currentMissionIndex < playerMissions.length - 1) {
-      // Show next mission for same player
-      const nextMissionIndex = currentMissionIndex + 1;
-      setCurrentMissionIndex(nextMissionIndex);
-      
-      const nextMission = playerMissions[nextMissionIndex];
-      if (nextMission) {
-        setCurrentMission(nextMission.mission);
-        setSelectedDifficulty(nextMission.mission.difficulty);
-      }
-      return;
-    }
-    
-    // Current player has seen all missions, move to next player
-    const nextPlayerIndex = currentPlayerIndex + 1;
-    
-    if (nextPlayerIndex < gameState.players.length) {
-      // Move to next player
-      const nextPlayer = gameState.players[nextPlayerIndex];
-      setCurrentPlayerIndex(nextPlayerIndex);
-      setCurrentMissionIndex(0); // Reset to first mission for new player
-      
-      // Set up first mission for next player
-      if (nextPlayer.missions.length > 0) {
-        setCurrentMission(nextPlayer.missions[0].mission);
-        setSelectedDifficulty(nextPlayer.missions[0].mission.difficulty);
-      }
-      return;
-    }
-    
-    // All players have seen all their missions - complete the assignment
-    setCurrentPhase(AssignmentPhase.COMPLETED);
-    
-    // Navigate to Dashboard tab after a short delay
-    setTimeout(() => {
-      updateGameStatus(GameStatus.IN_PROGRESS);
-      router.replace('/(tabs)/explore');
-    }, 2000);
-  };
 
   const getDifficultyLabel = (difficulty: DifficultyLevel): string => {
     const option = DIFFICULTY_OPTIONS.find(opt => opt.level === difficulty);
@@ -221,6 +80,317 @@ const AssignMissionsScreen: React.FC = () => {
   const getDifficultyPoints = (difficulty: DifficultyLevel): number => {
     const option = DIFFICULTY_OPTIONS.find(opt => opt.level === difficulty);
     return option ? option.points : 1;
+  };
+
+  const getDifficultyColor = (difficulty: DifficultyLevel): string => {
+    switch (difficulty) {
+      case DifficultyLevel.EASY:
+        return theme.colors.success; // Verde
+      case DifficultyLevel.MEDIUM:
+        return theme.colors.warning; // Arancione
+      case DifficultyLevel.HARD:
+        return theme.colors.error; // Rosso
+      default:
+        return theme.colors.accent; // Fallback
+    }
+  };
+
+  const assignMissionToPlayer = (playerId: string, difficulty: DifficultyLevel, missionIndex: number) => {
+    const player = gameState.players.find(p => p.id === playerId);
+    if (!player) {
+      return false;
+    }
+
+    const usedMissionIds = gameState.players.flatMap(player => 
+      player.missions.map(pm => pm.mission.id)
+    );
+
+    const mission = getRandomAvailableMissionByDifficulty(difficulty, usedMissionIds);
+    
+    if (mission) {
+      assignMissionWithDifficulty(playerId, mission, difficulty);
+      return true;
+    } else {
+      const difficultyLabel = getDifficultyLabel(difficulty);
+      const availableMissionsOfDifficulty = getMissionCountByDifficulty(difficulty);
+      const usedMissionsOfDifficulty = usedMissionIds.filter(id => {
+        const allMissions = gameState.players.flatMap(p => p.missions.map(pm => pm.mission));
+        const usedMission = allMissions.find(m => m.id === id);
+        return usedMission?.difficulty === difficulty;
+      }).length;
+      
+      if (isMixedMode) {
+        Alert.alert(
+          'Difficoltà Esaurita',
+          `Non ci sono più missioni di difficoltà "${difficultyLabel}" disponibili (${usedMissionsOfDifficulty}/${availableMissionsOfDifficulty} già utilizzate).\n\nScegli una difficoltà diversa per questa missione.`,
+          [{ text: 'OK' }]
+        );
+      } else {
+        Alert.alert(
+          'Errore Critico',
+          `Impossibile assegnare una missione di difficoltà "${difficultyLabel}". Questo non dovrebbe accadere.\n\nTorna alla configurazione e riduci il numero di missioni o cambia difficoltà.`,
+          [
+            { 
+              text: 'Torna alla Configurazione', 
+              onPress: () => router.back()
+            }
+          ]
+        );
+      }
+      return false;
+    }
+  };
+
+  const assignMissionToCurrentPlayer = (difficulty: DifficultyLevel, missionIndex?: number) => {
+    const currentPlayer = gameState.players[currentPlayerIndex];
+    if (!currentPlayer) return false;
+
+    // Use provided mission index or current state
+    const actualMissionIndex = missionIndex !== undefined ? missionIndex : currentMissionIndex;
+    
+    return assignMissionToPlayer(currentPlayer.id, difficulty, actualMissionIndex);
+  };
+
+  // Set up the mission when we enter MISSION_REVEAL phase
+  useEffect(() => {
+    if (currentPhase === AssignmentPhase.MISSION_REVEAL) {
+      const player = gameState.players[currentPlayerIndex];
+      if (player) {
+        const playerMissions = player.missions;
+        if (playerMissions.length > currentMissionIndex) {
+          const missionAtIndex = playerMissions[currentMissionIndex];
+          
+          if (missionAtIndex) {
+            setCurrentMission(missionAtIndex.mission);
+            setSelectedDifficulty(missionAtIndex.mission.difficulty);
+          }
+        }
+      }
+    }
+  }, [currentPhase, currentPlayerIndex, currentMissionIndex, gameState.players]);
+
+  // Force mission update whenever player or mission index changes
+  useEffect(() => {
+    if (currentPhase === AssignmentPhase.MISSION_REVEAL) {
+      const player = gameState.players[currentPlayerIndex];
+      if (player && player.missions.length > currentMissionIndex) {
+        const missionAtIndex = player.missions[currentMissionIndex];
+        if (missionAtIndex) {
+          setCurrentMission(missionAtIndex.mission);
+          setSelectedDifficulty(missionAtIndex.mission.difficulty);
+        }
+      }
+    }
+  }, [currentPlayerIndex, currentMissionIndex, currentPhase, gameState.players]);
+
+  // Auto-transition to MISSION_REVEAL when mission is assigned in uniform mode
+  useEffect(() => {
+    if (!isMixedMode && currentPhase !== AssignmentPhase.MISSION_REVEAL && currentPhase !== AssignmentPhase.INTRO && currentPhase !== AssignmentPhase.COMPLETED) {
+      const player = gameState.players[currentPlayerIndex];
+      
+      if (player) {
+        // Check if the mission at current index has been assigned
+        if (player.missions.length > currentMissionIndex) {
+          const missionAtIndex = player.missions[currentMissionIndex];
+          if (missionAtIndex) {
+            setCurrentPhase(AssignmentPhase.MISSION_REVEAL);
+          }
+        } else {
+          // Mission not assigned yet - assign it now in uniform mode
+          setTimeout(() => {
+            const success = assignMissionToPlayer(player.id, uniformDifficulty!, currentMissionIndex);
+            if (success) {
+              setTimeout(() => {
+                setCurrentPhase(AssignmentPhase.MISSION_REVEAL);
+              }, 100);
+            }
+          }, 50);
+        }
+      }
+    }
+  }, [gameState.players, currentPlayerIndex, currentMissionIndex, currentPhase, isMixedMode, uniformDifficulty]);
+
+  // Clear mission when not in MISSION_REVEAL phase
+  useEffect(() => {
+    if (currentPhase !== AssignmentPhase.MISSION_REVEAL) {
+      setCurrentMission(null);
+      setSelectedDifficulty(null);
+    }
+  }, [currentPhase]);
+
+  // Don't update game status here - it should already be ASSIGNING from SetupPlayersScreen
+  useEffect(() => {
+    if (gameState.status !== GameStatus.ASSIGNING && gameState.status !== GameStatus.CONFIGURING) {
+      console.warn('AssignMissionsScreen loaded with unexpected status:', gameState.status);
+    }
+  }, []);
+
+  // Calculate current state based on game state
+  const currentPlayer = gameState.players[currentPlayerIndex];
+  
+  const currentPlayerTargetMissions = useMemo(() => {
+    if (!currentPlayer) {
+      return gameState.configuration.missionsPerPlayer;
+    }
+    
+    if (currentPlayer.targetMissionCount !== gameState.configuration.missionsPerPlayer) {
+      console.warn(`Player targetMissionCount (${currentPlayer.targetMissionCount}) doesn't match configuration (${gameState.configuration.missionsPerPlayer})`);
+    }
+    
+    return currentPlayer.targetMissionCount;
+  }, [currentPlayer, gameState.configuration.missionsPerPlayer]);
+  
+  // For mission reveal, show which mission number we're currently revealing (1-based)
+  const currentMissionNumber = currentMissionIndex + 1;
+  
+  const styles = createStyles(theme);
+
+  const handleStartAssignment = () => {
+    if (gameState.players.length === 0) {
+      Alert.alert('Errore', 'Nessun giocatore trovato');
+      return;
+    }
+    
+    // Validate mission availability before starting assignment
+    const totalPlayersCount = gameState.players.length;
+    const missionsPerPlayer = gameState.configuration.missionsPerPlayer;
+    const totalMissionsNeeded = totalPlayersCount * missionsPerPlayer;
+    
+    if (isMixedMode) {
+      // Mixed Mode: Check if we have enough total missions
+      const totalAvailableMissions = getTotalMissionCount();
+      
+      if (totalAvailableMissions < totalMissionsNeeded) {
+        Alert.alert(
+          'Missioni Insufficienti',
+          `Servono ${totalMissionsNeeded} missioni per ${totalPlayersCount} giocatori con ${missionsPerPlayer} missioni ciascuno, ma sono disponibili solo ${totalAvailableMissions} missioni.\n\nRiduci il numero di giocatori o il numero di missioni per giocatore.`,
+          [{ text: 'OK' }]
+        );
+        return;
+      }
+      
+      // In mixed mode, we can't predict which difficulties players will choose,
+      // but we'll handle individual difficulty shortages during assignment
+    } else {
+      // Uniform Mode: Check if we have enough missions of the specific difficulty
+      if (!hasEnoughMissions(totalPlayersCount, missionsPerPlayer, uniformDifficulty)) {
+        const availableMissionsOfDifficulty = getMissionCountByDifficulty(uniformDifficulty!);
+        const difficultyLabel = getDifficultyLabel(uniformDifficulty!);
+        
+        Alert.alert(
+          'Missioni Insufficienti',
+          `Servono ${totalMissionsNeeded} missioni di difficoltà "${difficultyLabel}", ma sono disponibili solo ${availableMissionsOfDifficulty} missioni di questa difficoltà.\n\nCambia la difficoltà, riduci il numero di giocatori, o riduci il numero di missioni per giocatore.`,
+          [{ text: 'OK' }]
+        );
+        return;
+      }
+    }
+    
+    // Start with the first player's first mission
+    setCurrentPlayerIndex(0);
+    setCurrentMissionIndex(0);
+    
+    // In mixed mode, go to difficulty selection first
+    // In uniform mode, go directly to mission reveal (assign mission immediately)
+    if (isMixedMode) {
+      setCurrentPhase(AssignmentPhase.DIFFICULTY_SELECTION);
+    } else {
+      // In uniform mode, assign mission immediately and go to reveal
+      const success = assignMissionToCurrentPlayer(uniformDifficulty!);
+      if (success) {
+        setTimeout(() => {
+          setCurrentPhase(AssignmentPhase.MISSION_REVEAL);
+        }, 50);
+      } else {
+        return;
+      }
+    }
+  };
+
+  const handleMissionRevealStart = () => {
+    // Missions are already assigned and activated when the assignment started
+    // This function is called when the mission is first shown to the player
+  };
+
+  const handleDifficultySelected = (difficulty: DifficultyLevel) => {
+    // Assign mission with selected difficulty
+    const success = assignMissionToCurrentPlayer(difficulty);
+    
+    // Only move to mission reveal if assignment was successful
+    if (success) {
+      setCurrentPhase(AssignmentPhase.MISSION_REVEAL);
+    }
+    // If assignment failed, stay in difficulty selection to let user choose different difficulty
+  };
+
+  const handleMissionContinue = () => {
+    if (!currentPlayer) {
+      Alert.alert('Errore', 'Giocatore non trovato');
+      return;
+    }
+    
+    const nextMissionIndex = currentMissionIndex + 1;
+    
+    // Check if current player has more missions to assign
+    if (nextMissionIndex < currentPlayerTargetMissions) {
+      // Move to next mission for same player
+      setCurrentMissionIndex(nextMissionIndex);
+      
+      if (isMixedMode) {
+        setCurrentMission(null);
+        setSelectedDifficulty(null);
+        setCurrentPhase(AssignmentPhase.DIFFICULTY_SELECTION);
+      } else {
+        setCurrentMission(null);
+        setSelectedDifficulty(null);
+        
+        const success = assignMissionToCurrentPlayer(uniformDifficulty!, nextMissionIndex);
+        if (success) {
+          setTimeout(() => {
+            setCurrentPhase(AssignmentPhase.MISSION_REVEAL);
+          }, 50);
+        } else {
+          return;
+        }
+      }
+      return;
+    }
+    
+    // Current player has completed all missions, move to next player
+    const nextPlayerIndex = currentPlayerIndex + 1;
+    
+    if (nextPlayerIndex < gameState.players.length) {
+      // Move to next player
+      setCurrentPlayerIndex(nextPlayerIndex);
+      setCurrentMissionIndex(0);
+      
+      if (isMixedMode) {
+        setCurrentMission(null);
+        setSelectedDifficulty(null);
+        setCurrentPhase(AssignmentPhase.DIFFICULTY_SELECTION);
+      } else {
+        setCurrentMission(null);
+        setSelectedDifficulty(null);
+        
+        const success = assignMissionToCurrentPlayer(uniformDifficulty!, 0);
+        if (success) {
+          setTimeout(() => {
+            setCurrentPhase(AssignmentPhase.MISSION_REVEAL);
+          }, 50);
+        } else {
+          return;
+        }
+      }
+      return;
+    }
+    
+    // All players have completed all their missions
+    setCurrentPhase(AssignmentPhase.COMPLETED);
+    
+    setTimeout(() => {
+      updateGameStatus(GameStatus.IN_PROGRESS);
+      router.replace('/(tabs)/explore');
+    }, 2000);
   };
 
   if (currentPhase === AssignmentPhase.INTRO) {
@@ -289,16 +459,104 @@ const AssignMissionsScreen: React.FC = () => {
     );
   }
 
-  if (currentPhase === AssignmentPhase.MISSION_REVEAL) {
-    if (!currentMission || !selectedDifficulty) {
-      return (
-        <View style={[styles.container, { backgroundColor: theme.colors.backgroundPrimary }]}>
-          <StatusBar barStyle="dark-content" backgroundColor={theme.colors.backgroundPrimary} />
-          <View style={styles.content}>
-            <Text style={styles.errorText}>Errore nel caricamento della missione</Text>
+  if (currentPhase === AssignmentPhase.DIFFICULTY_SELECTION) {
+    return (
+      <View style={[styles.container, { backgroundColor: theme.colors.backgroundPrimary }]}>
+        <StatusBar barStyle="dark-content" backgroundColor={theme.colors.backgroundPrimary} />
+        <View style={styles.revealContainer}>
+          <View style={styles.revealHeader}>
+            <Text style={styles.revealTitle}>
+              Missione {currentMissionNumber} di {currentPlayerTargetMissions}
+            </Text>
+            <Text style={styles.revealProgress}>
+              Giocatore {currentPlayerIndex + 1} di {gameState.players.length}
+            </Text>
+            <Text style={styles.playerName}>
+              {currentPlayer.name}
+            </Text>
+          </View>
+          
+          <View style={styles.difficultySelectionContent}>
+            <Text style={styles.difficultySelectionTitle}>
+              Scegli la difficoltà per questa missione
+            </Text>
+            
+            <View style={styles.difficultyOptions}>
+              {DIFFICULTY_OPTIONS.map((option) => (
+                <TouchableOpacity
+                  key={option.level}
+                  style={styles.difficultyOption}
+                  onPress={() => handleDifficultySelected(option.level)}
+                  activeOpacity={0.8}
+                >
+                  <View style={styles.difficultyOptionHeader}>
+                    <Text style={styles.difficultyOptionLabel}>
+                      {option.label}
+                    </Text>
+                    <Text style={styles.difficultyOptionPoints}>
+                      {option.points} punt{option.points > 1 ? 'i' : 'o'}
+                    </Text>
+                  </View>
+                  <Text style={styles.difficultyOptionDescription}>
+                    {option.description}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
         </View>
-      );
+      </View>
+    );
+  }
+
+  if (currentPhase === AssignmentPhase.MISSION_REVEAL) {
+    if (!currentMission || !selectedDifficulty) {
+      const player = gameState.players[currentPlayerIndex];
+      const hasMissionData = player && player.missions.length > currentMissionIndex && player.missions[currentMissionIndex];
+      
+      if (!hasMissionData) {
+        // Fallback: If no mission data and we're in uniform mode, try to assign immediately
+        if (!isMixedMode && player && uniformDifficulty) {
+          const success = assignMissionToPlayer(player.id, uniformDifficulty, currentMissionIndex);
+          if (success) {
+            setTimeout(() => {
+              const updatedPlayer = gameState.players[currentPlayerIndex];
+              if (updatedPlayer && updatedPlayer.missions.length > currentMissionIndex) {
+                const missionAtIndex = updatedPlayer.missions[currentMissionIndex];
+                if (missionAtIndex) {
+                  setCurrentMission(missionAtIndex.mission);
+                  setSelectedDifficulty(missionAtIndex.mission.difficulty);
+                }
+              }
+            }, 200);
+          }
+        }
+        
+        return (
+          <View style={[styles.container, { backgroundColor: theme.colors.backgroundPrimary }]}>
+            <StatusBar barStyle="dark-content" backgroundColor={theme.colors.backgroundPrimary} />
+            <View style={styles.content}>
+              <Text style={styles.errorText}>Caricamento missione...</Text>
+            </View>
+          </View>
+        );
+      } else {
+        // Mission data exists but state hasn't updated yet - trigger update
+        const missionAtIndex = player.missions[currentMissionIndex];
+        if (missionAtIndex && !currentMission) {
+          setCurrentMission(missionAtIndex.mission);
+          setSelectedDifficulty(missionAtIndex.mission.difficulty);
+        }
+        
+        return (
+          <View style={[styles.container, { backgroundColor: theme.colors.backgroundPrimary }]}>
+            <StatusBar barStyle="dark-content" backgroundColor={theme.colors.backgroundPrimary} />
+            <View style={styles.content}>
+              <Text style={styles.errorText}>Caricamento missione...</Text>
+            </View>
+          </View>
+        );
+      }
     }
 
     // Calculate button text based on current state
@@ -328,7 +586,10 @@ const AssignMissionsScreen: React.FC = () => {
             </Text>
             
             <View style={styles.missionInfo}>
-              <View style={styles.difficultyBadge}>
+              <View style={[
+                styles.difficultyBadge,
+                { backgroundColor: getDifficultyColor(selectedDifficulty) }
+              ]}>
                 <Text style={styles.difficultyBadgeText}>
                   {getDifficultyLabel(selectedDifficulty)}
                 </Text>
@@ -510,7 +771,6 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     marginBottom: theme.spacing.lg, // Reduced spacing below difficulty badges
   },
   difficultyBadge: {
-    backgroundColor: theme.colors.accent,
     paddingHorizontal: theme.spacing.md,
     paddingVertical: theme.spacing.sm,
     borderRadius: theme.borderRadius.medium,
@@ -577,6 +837,51 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     ...theme.typography.body,
     color: theme.colors.textSecondary,
     textAlign: 'center',
+  },
+  
+  // Difficulty Selection Styles
+  difficultySelectionContent: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: theme.spacing.lg,
+  },
+  difficultySelectionTitle: {
+    ...theme.typography.title2,
+    color: theme.colors.secondary,
+    textAlign: 'center',
+    marginBottom: theme.spacing.xl,
+  },
+  difficultyOptions: {
+    gap: theme.spacing.md,
+  },
+  difficultyOption: {
+    backgroundColor: theme.colors.backgroundPrimary,
+    borderRadius: theme.borderRadius.medium,
+    padding: theme.spacing.lg,
+    ...theme.shadows.medium,
+    borderWidth: 1,
+    borderColor: theme.colors.backgroundSecondary,
+  },
+  difficultyOptionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: theme.spacing.sm,
+  },
+  difficultyOptionLabel: {
+    ...theme.typography.headline,
+    color: theme.colors.textPrimary,
+    fontWeight: '600',
+  },
+  difficultyOptionPoints: {
+    ...theme.typography.subhead,
+    color: theme.colors.primary,
+    fontWeight: '600',
+  },
+  difficultyOptionDescription: {
+    ...theme.typography.callout,
+    color: theme.colors.textSecondary,
+    lineHeight: 20,
   },
 });
 
