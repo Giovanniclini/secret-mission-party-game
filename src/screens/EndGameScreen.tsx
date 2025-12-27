@@ -196,7 +196,7 @@ const EndGameScreen: React.FC = () => {
             
             <View style={styles.statCard}>
               <Text style={styles.statNumber}>{gameStats.totalMissionsCompleted}</Text>
-              <Text style={styles.statLabel}>Completate</Text>
+              <Text style={styles.statLabel}>Missioni{'\n'}Completate</Text>
             </View>
             
             <View style={styles.statCard}>
@@ -416,27 +416,34 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    gap: theme.spacing.md,
+    gap: theme.spacing.sm, // Reduced gap for tighter layout
     marginBottom: theme.spacing.md,
   },
   statCard: {
     backgroundColor: theme.colors.backgroundSecondary,
     borderRadius: theme.borderRadius.medium,
-    padding: theme.spacing.md,
+    padding: theme.spacing.sm,
     alignItems: 'center',
-    width: '48%',
-    minWidth: 120,
+    justifyContent: 'center', // Center content vertically
+    width: '47%',
+    minWidth: 100,
+    height: 70, // Fixed height to make all cards uniform
+    flex: 0,
   },
   statNumber: {
-    ...theme.typography.title1,
+    ...theme.typography.headline,
     color: theme.colors.accent,
-    marginBottom: theme.spacing.xs,
+    marginBottom: theme.spacing.xs / 2,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
   statLabel: {
     ...theme.typography.caption,
     color: theme.colors.textSecondary,
     textAlign: 'center',
     fontWeight: '500',
+    fontSize: 11,
+    lineHeight: 13, // Tighter line height for multi-line labels
   },
   
   // Performance Highlights

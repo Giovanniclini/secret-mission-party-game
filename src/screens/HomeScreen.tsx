@@ -52,28 +52,6 @@ const HomeScreen: React.FC = () => {
     }
   };
 
-  const handleResumeGame = async () => {
-    await handleAsyncError(async () => {
-      // Navigate to appropriate screen based on game status
-      switch (gameState.status) {
-        case GameStatus.SETUP:
-          router.push('/game-configuration');
-          break;
-        case GameStatus.CONFIGURING:
-          router.push('/setup-players');
-          break;
-        case GameStatus.ASSIGNING:
-          router.push('/assign-missions');
-          break;
-        case GameStatus.IN_PROGRESS:
-          router.push('/(tabs)/explore');
-          break;
-        default:
-          throw new Error('Stato del gioco non valido per la ripresa');
-      }
-    }, 'Errore durante la ripresa della partita.');
-  };
-
   if (isLoading) {
     return (
       <View style={[styles.container, { backgroundColor: theme.colors.backgroundPrimary }]}>
@@ -121,15 +99,7 @@ const HomeScreen: React.FC = () => {
           style={styles.primaryButton}
         />
         
-        {gameCanBeResumed && (
-          <Button
-            title="Riprendi Partita"
-            onPress={handleResumeGame}
-            variant="secondary"
-            size="large"
-            style={styles.secondaryButton}
-          />
-        )}
+
         
         <Button
           title="Regole del Gioco"
@@ -219,9 +189,6 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   primaryButton: {
-    width: '100%',
-  },
-  secondaryButton: {
     width: '100%',
   },
   rulesButton: {

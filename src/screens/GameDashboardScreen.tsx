@@ -178,41 +178,41 @@ const GameDashboardScreen: React.FC = () => {
         </Text>
       </View>
 
+      {/* Fixed Overall Game Progress */}
+      <View style={styles.overallProgressCard}>
+        <Text style={styles.cardTitle}>Progresso Generale</Text>
+        
+        <View style={styles.progressStatsRow}>
+          <View style={styles.progressStat}>
+            <Text style={styles.progressStatNumber}>{progress.totalMissionsCompleted}</Text>
+            <Text style={styles.progressStatLabel}>Completate</Text>
+          </View>
+          <View style={styles.progressStat}>
+            <Text style={styles.progressStatNumber}>{progress.totalMissionsNeeded}</Text>
+            <Text style={styles.progressStatLabel}>Totali</Text>
+          </View>
+          <View style={styles.progressStat}>
+            <Text style={styles.progressStatNumber}>{Math.round(progress.percentage)}%</Text>
+            <Text style={styles.progressStatLabel}>Completamento</Text>
+          </View>
+        </View>
+        
+        <View style={styles.progressBar}>
+          <View 
+            style={[
+              styles.progressBarFill, 
+              { width: `${Math.min(100, progress.percentage)}%` }
+            ]} 
+          />
+        </View>
+      </View>
+
       {/* Scrollable Content */}
       <ScrollView 
         style={styles.scrollContainer}
         contentContainerStyle={styles.scrollContentContainer}
         showsVerticalScrollIndicator={false}
       >
-        {/* Overall Game Progress */}
-        <View style={styles.overallProgressCard}>
-          <Text style={styles.cardTitle}>Progresso Generale</Text>
-          
-          <View style={styles.progressStatsRow}>
-            <View style={styles.progressStat}>
-              <Text style={styles.progressStatNumber}>{progress.totalMissionsCompleted}</Text>
-              <Text style={styles.progressStatLabel}>Completate</Text>
-            </View>
-            <View style={styles.progressStat}>
-              <Text style={styles.progressStatNumber}>{progress.totalMissionsNeeded}</Text>
-              <Text style={styles.progressStatLabel}>Totali</Text>
-            </View>
-            <View style={styles.progressStat}>
-              <Text style={styles.progressStatNumber}>{Math.round(progress.percentage)}%</Text>
-              <Text style={styles.progressStatLabel}>Completamento</Text>
-            </View>
-          </View>
-          
-          <View style={styles.progressBar}>
-            <View 
-              style={[
-                styles.progressBarFill, 
-                { width: `${Math.min(100, progress.percentage)}%` }
-              ]} 
-            />
-          </View>
-        </View>
-
         {/* Current Leaderboard */}
         <View style={styles.leaderboardCard}>
           <Text style={styles.cardTitle}>Classifica Attuale</Text>
@@ -257,7 +257,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   fixedHeader: {
     alignItems: 'center',
     paddingHorizontal: theme.spacing.lg,
-    paddingTop: theme.spacing.xl,
+    paddingTop: theme.spacing.xl + theme.spacing.lg, // More padding from top
     paddingBottom: theme.spacing.md,
     backgroundColor: theme.colors.backgroundPrimary,
     borderBottomWidth: 1,
@@ -267,7 +267,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     flex: 1,
   },
   scrollContentContainer: {
-    paddingBottom: theme.spacing.lg,
+    paddingBottom: theme.spacing.sm, // Reduced padding to bring content closer to tab navigation
   },
   title: {
     ...theme.typography.title1,
@@ -281,57 +281,59 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     textAlign: 'center',
   },
   
-  // Overall Progress Card
+  // Overall Progress Card (Fixed)
   overallProgressCard: {
     backgroundColor: theme.colors.backgroundPrimary,
     marginHorizontal: theme.spacing.lg,
-    marginTop: theme.spacing.lg,
-    marginBottom: theme.spacing.lg,
+    marginVertical: theme.spacing.sm,
     borderRadius: theme.borderRadius.medium,
-    padding: theme.spacing.lg,
+    padding: theme.spacing.md,
     ...theme.shadows.medium,
   },
   cardTitle: {
-    ...theme.typography.headline,
+    ...theme.typography.subhead,
     color: theme.colors.secondary,
     textAlign: 'center',
-    marginBottom: theme.spacing.lg,
+    marginBottom: theme.spacing.md,
+    fontWeight: '600',
   },
   progressStatsRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginBottom: theme.spacing.lg,
+    marginBottom: theme.spacing.md,
   },
   progressStat: {
     alignItems: 'center',
   },
   progressStatNumber: {
-    ...theme.typography.title2,
+    ...theme.typography.headline,
     color: theme.colors.accent,
-    marginBottom: theme.spacing.xs,
+    marginBottom: theme.spacing.xs / 2,
   },
   progressStatLabel: {
     ...theme.typography.caption,
     color: theme.colors.textSecondary,
     textAlign: 'center',
+    fontSize: 11,
   },
   progressBar: {
-    height: 8,
+    height: 6,
     backgroundColor: theme.colors.backgroundSecondary,
-    borderRadius: 4,
+    borderRadius: 3,
     overflow: 'hidden',
   },
   progressBarFill: {
     height: '100%',
     backgroundColor: theme.colors.accent,
-    borderRadius: 4,
+    borderRadius: 3,
   },
   
-  // Leaderboard Card
+  // Leaderboard Card (Scrollable)
   leaderboardCard: {
     backgroundColor: theme.colors.backgroundPrimary,
     marginHorizontal: theme.spacing.lg,
-    marginBottom: theme.spacing.lg,
+    marginTop: theme.spacing.md,
+    marginBottom: theme.spacing.sm, // Reduced bottom margin
     borderRadius: theme.borderRadius.medium,
     padding: theme.spacing.lg,
     ...theme.shadows.medium,
@@ -415,12 +417,12 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   
   // Fixed Action Buttons
   fixedButtonContainer: {
-    padding: theme.spacing.lg,
-    paddingTop: theme.spacing.md,
+    padding: theme.spacing.md, // Reduced padding
+    paddingTop: theme.spacing.sm, // Less space from content above
     backgroundColor: theme.colors.backgroundPrimary,
     borderTopWidth: 1,
     borderTopColor: theme.colors.backgroundSecondary,
-    gap: theme.spacing.md,
+    gap: theme.spacing.sm, // Reduced gap between buttons
   },
   myTurnButton: {
     backgroundColor: theme.colors.primary,
