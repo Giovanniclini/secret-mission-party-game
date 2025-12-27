@@ -1,146 +1,185 @@
-# 🎮 Secret Mission - Party Game App
+# Secret Mission - Party Game App
 
-Una sofisticata app per feste offline che trasforma qualsiasi riunione in un'esperienza di gioco coinvolgente attraverso missioni segrete e meccaniche pass-the-phone.
+A sophisticated offline party game app that transforms any gathering into an engaging experience through secret missions and pass-the-phone mechanics.
 
-## ✨ Caratteristiche
+## Features
 
-- **🎯 Gioco Offline Completo**: Nessuna connessione internet richiesta
-- **📱 Pass-the-Phone**: Meccaniche di gioco che coinvolgono tutti i partecipanti
-- **🔒 Rivelazione Sicura**: Sistema di rivelazione missioni con press-and-hold
-- **👥 Gestione Giocatori**: Aggiungi/rimuovi giocatori durante la partita
-- **🏆 Rilevamento Vincitore**: Sistema automatico di vittoria e celebrazione
-- **🎨 Design Sofisticato**: UI premium iOS-native senza elementi cartoon
+- **Complete Offline Game**: No internet connection required
+- **Pass-the-Phone Mechanics**: Game mechanics that involve all participants
+- **Secure Mission Reveal**: Press-and-hold mission revelation system
+- **Player Management**: Add/remove players during the game
+- **Winner Detection**: Automatic victory system and celebration
+- **Sophisticated Design**: Premium iOS-native UI without cartoon elements
+- **Color-Coded Difficulty**: Visual difficulty indicators with green/orange/red badges
+- **Multiple Game Modes**: Uniform difficulty or mixed difficulty modes
+- **Comprehensive Mission Pool**: 150 missions across three difficulty levels
 
-## 🏗️ Architettura Tecnica
+## Technical Architecture
 
 - **Framework**: React Native + Expo + TypeScript
-- **State Management**: Context + useReducer
-- **Persistenza**: AsyncStorage per funzionalità offline
-- **Testing**: Jest + Property-Based Testing con fast-check
-- **Design System**: Sistema di design personalizzato con palette colori obbligatoria
+- **State Management**: Context + useReducer pattern
+- **Persistence**: AsyncStorage for offline functionality
+- **Testing**: Jest + Property-Based Testing with fast-check
+- **Design System**: Custom design system with mandatory color palette
 
-## 🎨 Sistema di Design
+## Design System
 
-### Palette Colori
-- **Primary/Brand**: `#F5B301` (oro)
-- **Secondary**: `#1F2A44` (blu navy profondo)
-- **Accent**: `#2EC4C6` (teal morbido)
+### Color Palette
+- **Primary/Brand**: `#F5B301` (gold)
+- **Secondary**: `#1F2A44` (deep navy blue)
+- **Accent**: `#2EC4C6` (soft teal)
+- **Success**: `#10B981` (green - easy difficulty)
+- **Warning**: `#F59E0B` (orange - medium difficulty)
+- **Error**: `#EF4444` (red - hard difficulty)
 - **Text Primary**: `#2B2B2B`
 - **Background**: `#FFFFFF` / `#F5F6F8`
 
-### Principi di Design
-- ✅ Moderno, pulito, premium iOS feel
-- ✅ Coinvolgente ma NON cartoonesco o infantile
-- ✅ UX veloce e senza attriti
-- ✅ Privacy-first by design
+### Design Principles
+- Modern, clean, premium iOS feel
+- Engaging but NOT cartoonish or childish
+- Fast and frictionless UX
+- Privacy-first by design
 
-## 🚀 Installazione e Setup
+## Installation and Setup
 
-### Prerequisiti
-- Node.js (v18 o superiore)
-- npm o yarn
+### Prerequisites
+- Node.js (v18 or higher)
+- npm or yarn
 - Expo CLI
-- iOS Simulator o dispositivo iOS
+- iOS Simulator or iOS device
 
-### Installazione
+### Installation
 ```bash
-# Clona il repository
-git clone https://github.com/[username]/secret-mission-app.git
-cd secret-mission-app
+# Clone the repository
+git clone https://github.com/Giovanniclini/secret-mission-party-game.git
+cd secret-mission-party-game/SecretMission
 
-# Installa le dipendenze
+# Install dependencies
 npm install
 
-# Avvia l'app
+# Start the app
 npm start
 ```
 
-### Comandi Disponibili
+### Available Commands
 ```bash
-npm start          # Avvia Expo development server
-npm run ios        # Avvia su iOS simulator
-npm run android    # Avvia su Android emulator
-npm test           # Esegue tutti i test
-npm run lint       # Esegue ESLint
-npm run build      # Build per produzione
+npm start          # Start Expo development server
+npm run ios        # Run on iOS simulator
+npm run android    # Run on Android emulator
+npm test           # Run all tests
+npm run lint       # Run ESLint
 ```
 
-## 🧪 Testing
+## Testing
 
-Il progetto include una suite di test completa:
-- **56 test** che passano tutti
-- **Property-Based Testing** per validazione robusta
-- **MVP Validation** e checklist QA
-- **Copertura errori** completa
+The project includes a comprehensive test suite:
+- **139 tests** all passing
+- **Property-Based Testing** for robust validation
+- **MVP Validation** and QA checklist
+- **Complete error coverage**
 
 ```bash
-npm test           # Esegue tutti i test
-npm run test:watch # Esegue test in modalità watch
+npm test           # Run all tests
+npm run test:watch # Run tests in watch mode
 ```
 
-## 📱 Come Giocare
+## How to Play
 
-1. **Setup**: Aggiungi almeno 3 giocatori
-2. **Assegnazione**: Ogni giocatore riceve una missione segreta
-3. **Gioco**: I giocatori tentano di completare le loro missioni
-4. **Rivelazione**: Usa "Vedi o aggiorna status missione" per rivelare e aggiornare
-5. **Vittoria**: Il primo a completare 1 missione vince!
+1. **Setup**: Add at least 3 players
+2. **Configuration**: Choose difficulty mode (Uniform or Mixed)
+3. **Assignment**: Each player receives secret missions
+4. **Gameplay**: Players attempt to complete their missions during the party
+5. **Revelation**: Use "View or update mission status" to reveal and update
+6. **Victory**: First player to complete their target missions wins!
 
-## 🏆 Funzionalità Principali
+## Key Features
 
-### Gestione Giocatori
-- Aggiunta/rimozione dinamica durante la partita
-- Validazione nomi (2-20 caratteri, no duplicati)
-- Minimo 3 giocatori richiesti
+### Player Management
+- Dynamic add/remove during gameplay
+- Name validation (2-20 characters, no duplicates)
+- Minimum 3 players required
 
-### Sistema Missioni
-- Rivelazione sicura con press-and-hold
-- Stati: In Attesa → Attiva → Completata/Scoperta
-- Assegnazione automatica per nuovi giocatori
+### Mission System
+- **150 unique missions** across three difficulty levels:
+  - **Easy (50 missions)**: 1 point each - Simple social interactions
+  - **Medium (50 missions)**: 2 points each - Moderate challenges
+  - **Hard (50 missions)**: 3 points each - Complex group interactions
+- Secure reveal with press-and-hold
+- States: Waiting → Active → Completed/Caught
+- Automatic assignment for new players
+- **Color-coded difficulty badges**: Green (Easy), Orange (Medium), Red (Hard)
 
-### Privacy e Sicurezza
-- Mai mostrare liste di missioni
-- Solo rivelazioni individuali
-- Design che protegge il contenuto delle missioni
+### Game Modes
+- **Uniform Mode**: All missions have the same difficulty level
+- **Mixed Mode**: Players choose difficulty for each mission individually
+- Configurable missions per player (1-10)
 
-## 🛠️ Struttura del Progetto
+### Privacy and Security
+- Never show mission lists
+- Individual revelations only
+- Design that protects mission content
+
+## Project Structure
 
 ```
 src/
-├── screens/           # Schermate dell'app
-├── components/        # Componenti riutilizzabili
+├── screens/           # App screens
+│   ├── AssignMissionsScreen.tsx    # Mission assignment with color-coded badges
+│   ├── GameDashboardScreen.tsx     # Main game dashboard
+│   ├── GameConfigurationScreen.tsx # Game setup and configuration
+│   ├── SetupPlayersScreen.tsx      # Player management
+│   ├── MyTurnScreen.tsx           # Individual mission view
+│   └── EndGameScreen.tsx          # Game completion and results
+├── components/        # Reusable components
+│   ├── ui/           # UI components (Button, StatusIndicator)
+│   ├── MissionCard.tsx           # Mission display component
+│   ├── SecureReveal.tsx          # Press-and-hold reveal component
+│   ├── PrivacyScreen.tsx         # Privacy protection overlay
+│   └── GameRulesModal.tsx        # Game rules and instructions
 ├── store/            # State management (Context + Reducer)
-├── models/           # Tipi TypeScript e interfacce
-├── data/             # Dati statici (missioni)
-├── utils/            # Funzioni di utilità
-├── theme/            # Sistema di design e costanti
-└── __tests__/        # Test suite
+├── models/           # TypeScript types and interfaces
+├── data/             # Static data (150 missions in Italian)
+├── utils/            # Utility functions
+├── theme/            # Design system and constants
+└── __tests__/        # Test suite (139 tests)
 ```
 
-## 📋 Roadmap
+## Recent Updates
 
-- [ ] Espansione per Android
-- [ ] Più categorie di missioni
-- [ ] Modalità torneo
-- [ ] Personalizzazione temi
-- [ ] Statistiche avanzate
+### Version 1.0 (Latest)
+- **Color-coded difficulty badges**: Easy (Green), Medium (Orange), Hard (Hard)
+- **Enhanced mission assignment flow**: Improved race condition handling
+- **Game rules modal**: In-app instructions and help
+- **Comprehensive test coverage**: 139 passing tests
+- **Bug fixes**: Player 2+ loading issues resolved
+- **Code cleanup**: Removed debug code and unnecessary test files
 
-## 🤝 Contribuire
+## Roadmap
 
-1. Fork del progetto
-2. Crea un branch per la feature (`git checkout -b feature/AmazingFeature`)
-3. Commit delle modifiche (`git commit -m 'Add some AmazingFeature'`)
-4. Push al branch (`git push origin feature/AmazingFeature`)
-5. Apri una Pull Request
+- [ ] Android expansion
+- [ ] More mission categories
+- [ ] Tournament mode
+- [ ] Theme customization
+- [ ] Advanced statistics
+- [ ] Mission editor
+- [ ] Multiplayer networking (future consideration)
 
-## 📄 Licenza
+## Contributing
 
-Questo progetto è sotto licenza MIT. Vedi il file `LICENSE` per i dettagli.
+1. Fork the project
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-## 🎯 MVP Status
+## License
 
-✅ **Completato** - L'app è pronta per l'uso con tutte le funzionalità core implementate e testate.
+This project is licensed under the MIT License. See the `LICENSE` file for details.
+
+## MVP Status
+
+**Completed** - The app is ready for use with all core features implemented and tested.
 
 ---
 
-*Sviluppato con ❤️ per creare momenti di divertimento e connessione nelle feste*
+*Developed with care to create moments of fun and connection at parties*
