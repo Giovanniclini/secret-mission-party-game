@@ -10,7 +10,9 @@
     "newArchEnabled": true,
     "description": "Il gioco di società per feste - Completa missioni segrete senza farti scoprire!",
     "privacy": "public",
-    "platforms": ["ios"],
+    "platforms": [
+      "ios"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.devcat.secretmission",
@@ -46,9 +48,11 @@
       "reactCompiler": true
     },
     "extra": {
+      "router": {},
       "eas": {
-        "projectId": "your-project-id-will-be-generated"
+        "projectId": "0fa6cc26-9617-4bd9-ad61-cfac4b850a66"
       }
-    }
+    },
+    "owner": "gioviclini"
   }
 }
