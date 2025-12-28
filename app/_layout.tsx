@@ -24,9 +24,9 @@ export default function RootLayout() {
               name="game-configuration" 
               options={{ 
                 title: 'Configurazione Partita',
-                headerBackVisible: true, // Enable back button to go to homepage
-                headerBackTitle: undefined, // Explicitly set to undefined
-                gestureEnabled: true, // Enable swipe back gesture on iOS
+                headerBackVisible: true,
+                headerBackTitle: '',
+                gestureEnabled: true,
                 presentation: 'card'
               }} 
             />

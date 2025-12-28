@@ -124,7 +124,11 @@ const EndGameScreen: React.FC = () => {
           style: 'destructive',
           onPress: () => {
             createGame();
-            router.push('/game-configuration');
+            // Navigate to home first, then to configuration to ensure clean navigation stack
+            router.push('/');
+            setTimeout(() => {
+              router.push('/game-configuration');
+            }, 100);
           },
         },
       ]
