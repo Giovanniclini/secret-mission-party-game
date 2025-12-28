@@ -1,36 +1,37 @@
 {
   "expo": {
-    "name": "SecretMission",
-    "slug": "SecretMission",
+    "name": "Secret Mission",
+    "slug": "secret-mission",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/secret-mission-logo-appstore.png",
     "scheme": "secretmission",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "description": "Il gioco di società per feste - Completa missioni segrete senza farti scoprire!",
+    "privacy": "public",
+    "platforms": ["ios"],
     "ios": {
-      "supportsTablet": true
-    },
-    "android": {
-      "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
-      },
-      "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "supportsTablet": true,
+      "bundleIdentifier": "com.devcat.secretmission",
+      "buildNumber": "1",
+      "infoPlist": {
+        "CFBundleDisplayName": "Secret Mission",
+        "NSCameraUsageDescription": "This app does not use the camera.",
+        "NSMicrophoneUsageDescription": "This app does not use the microphone.",
+        "NSLocationWhenInUseUsageDescription": "This app does not use location services."
+      }
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/secret-mission-logo-appstore.png"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/secret-mission-logo.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",
@@ -43,6 +44,11 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "your-project-id-will-be-generated"
+      }
     }
   }
 }
