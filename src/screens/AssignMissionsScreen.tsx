@@ -183,33 +183,6 @@ const AssignMissionsScreen: React.FC = () => {
     }
   }, [currentPlayerIndex, currentMissionIndex, currentPhase, gameState.players]);
 
-  // Auto-transition to MISSION_REVEAL when mission is assigned in uniform mode
-  useEffect(() => {
-    if (!isMixedMode && currentPhase !== AssignmentPhase.MISSION_REVEAL && currentPhase !== AssignmentPhase.INTRO && currentPhase !== AssignmentPhase.COMPLETED) {
-      const player = gameState.players[currentPlayerIndex];
-      
-      if (player) {
-        // Check if the mission at current index has been assigned
-        if (player.missions.length > currentMissionIndex) {
-          const missionAtIndex = player.missions[currentMissionIndex];
-          if (missionAtIndex) {
-            setCurrentPhase(AssignmentPhase.MISSION_REVEAL);
-          }
-        } else {
-          // Mission not assigned yet - assign it now in uniform mode
-          setTimeout(() => {
-            const success = assignMissionToPlayer(player.id, uniformDifficulty!, currentMissionIndex);
-            if (success) {
-              setTimeout(() => {
-                setCurrentPhase(AssignmentPhase.MISSION_REVEAL);
-              }, 100);
-            }
-          }, 50);
-        }
-      }
-    }
-  }, [gameState.players, currentPlayerIndex, currentMissionIndex, currentPhase, isMixedMode, uniformDifficulty]);
-
   // Clear mission when not in MISSION_REVEAL phase
   useEffect(() => {
     if (currentPhase !== AssignmentPhase.MISSION_REVEAL) {
@@ -298,11 +271,7 @@ const AssignMissionsScreen: React.FC = () => {
       // In uniform mode, assign mission immediately and go to reveal
       const success = assignMissionToCurrentPlayer(uniformDifficulty!);
       if (success) {
-        setTimeout(() => {
-          setCurrentPhase(AssignmentPhase.MISSION_REVEAL);
-        }, 50);
-      } else {
-        return;
+        setCurrentPhase(AssignmentPhase.MISSION_REVEAL);
       }
     }
   };
@@ -344,13 +313,10 @@ const AssignMissionsScreen: React.FC = () => {
         setCurrentMission(null);
         setSelectedDifficulty(null);
         
-        const success = assignMissionToCurrentPlayer(uniformDifficulty!, nextMissionIndex);
+        // Assign mission immediately for uniform mode
+        const success = assignMissionToPlayer(gameState.players[currentPlayerIndex].id, uniformDifficulty!, nextMissionIndex);
         if (success) {
-          setTimeout(() => {
-            setCurrentPhase(AssignmentPhase.MISSION_REVEAL);
-          }, 50);
-        } else {
-          return;
+          setCurrentPhase(AssignmentPhase.MISSION_REVEAL);
         }
       }
       return;
@@ -372,13 +338,10 @@ const AssignMissionsScreen: React.FC = () => {
         setCurrentMission(null);
         setSelectedDifficulty(null);
         
-        const success = assignMissionToCurrentPlayer(uniformDifficulty!, 0);
+        // Assign mission immediately for uniform mode
+        const success = assignMissionToPlayer(gameState.players[nextPlayerIndex].id, uniformDifficulty!, 0);
         if (success) {
-          setTimeout(() => {
-            setCurrentPhase(AssignmentPhase.MISSION_REVEAL);
-          }, 50);
-        } else {
-          return;
+          setCurrentPhase(AssignmentPhase.MISSION_REVEAL);
         }
       }
       return;
@@ -396,7 +359,10 @@ const AssignMissionsScreen: React.FC = () => {
   if (currentPhase === AssignmentPhase.INTRO) {
     return (
       <View style={[styles.container, { backgroundColor: theme.colors.backgroundPrimary }]}>
-        <StatusBar barStyle="dark-content" backgroundColor={theme.colors.backgroundPrimary} />
+        <StatusBar 
+          barStyle={theme.colorScheme === 'dark' ? 'light-content' : 'dark-content'} 
+          backgroundColor={theme.colors.backgroundPrimary} 
+        />
         
         {/* Scrollable Content */}
         <ScrollView 
@@ -462,7 +428,10 @@ const AssignMissionsScreen: React.FC = () => {
   if (currentPhase === AssignmentPhase.DIFFICULTY_SELECTION) {
     return (
       <View style={[styles.container, { backgroundColor: theme.colors.backgroundPrimary }]}>
-        <StatusBar barStyle="dark-content" backgroundColor={theme.colors.backgroundPrimary} />
+        <StatusBar 
+          barStyle={theme.colorScheme === 'dark' ? 'light-content' : 'dark-content'} 
+          backgroundColor={theme.colors.backgroundPrimary} 
+        />
         <View style={styles.revealContainer}>
           <View style={styles.revealHeader}>
             <Text style={styles.revealTitle}>
@@ -515,26 +484,12 @@ const AssignMissionsScreen: React.FC = () => {
       const hasMissionData = player && player.missions.length > currentMissionIndex && player.missions[currentMissionIndex];
       
       if (!hasMissionData) {
-        // Fallback: If no mission data and we're in uniform mode, try to assign immediately
-        if (!isMixedMode && player && uniformDifficulty) {
-          const success = assignMissionToPlayer(player.id, uniformDifficulty, currentMissionIndex);
-          if (success) {
-            setTimeout(() => {
-              const updatedPlayer = gameState.players[currentPlayerIndex];
-              if (updatedPlayer && updatedPlayer.missions.length > currentMissionIndex) {
-                const missionAtIndex = updatedPlayer.missions[currentMissionIndex];
-                if (missionAtIndex) {
-                  setCurrentMission(missionAtIndex.mission);
-                  setSelectedDifficulty(missionAtIndex.mission.difficulty);
-                }
-              }
-            }, 200);
-          }
-        }
-        
         return (
           <View style={[styles.container, { backgroundColor: theme.colors.backgroundPrimary }]}>
-            <StatusBar barStyle="dark-content" backgroundColor={theme.colors.backgroundPrimary} />
+            <StatusBar 
+              barStyle={theme.colorScheme === 'dark' ? 'light-content' : 'dark-content'} 
+              backgroundColor={theme.colors.backgroundPrimary} 
+            />
             <View style={styles.content}>
               <Text style={styles.errorText}>Caricamento missione...</Text>
             </View>
@@ -550,7 +505,10 @@ const AssignMissionsScreen: React.FC = () => {
         
         return (
           <View style={[styles.container, { backgroundColor: theme.colors.backgroundPrimary }]}>
-            <StatusBar barStyle="dark-content" backgroundColor={theme.colors.backgroundPrimary} />
+            <StatusBar 
+              barStyle={theme.colorScheme === 'dark' ? 'light-content' : 'dark-content'} 
+              backgroundColor={theme.colors.backgroundPrimary} 
+            />
             <View style={styles.content}>
               <Text style={styles.errorText}>Caricamento missione...</Text>
             </View>
@@ -572,7 +530,10 @@ const AssignMissionsScreen: React.FC = () => {
 
     return (
       <View style={[styles.container, { backgroundColor: theme.colors.backgroundPrimary }]}>
-        <StatusBar barStyle="dark-content" backgroundColor={theme.colors.backgroundPrimary} />
+        <StatusBar 
+          barStyle={theme.colorScheme === 'dark' ? 'light-content' : 'dark-content'} 
+          backgroundColor={theme.colors.backgroundPrimary} 
+        />
         <View style={styles.revealContainer}>
           <View style={styles.revealHeader}>
             <Text style={styles.revealTitle}>
@@ -627,7 +588,10 @@ const AssignMissionsScreen: React.FC = () => {
   if (currentPhase === AssignmentPhase.COMPLETED) {
     return (
       <View style={[styles.container, { backgroundColor: theme.colors.backgroundPrimary }]}>
-        <StatusBar barStyle="dark-content" backgroundColor={theme.colors.backgroundPrimary} />
+        <StatusBar 
+          barStyle={theme.colorScheme === 'dark' ? 'light-content' : 'dark-content'} 
+          backgroundColor={theme.colors.backgroundPrimary} 
+        />
         <View style={styles.content}>
           <View style={styles.header}>
             <Text style={styles.title}>Missioni Assegnate</Text>
