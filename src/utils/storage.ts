@@ -69,7 +69,8 @@ const sanitizeGameState = (data: any): GameState | null => {
       return sanitizePlayerScoring(playerWithDefaults);
     }).filter(Boolean);
 
-    if (sanitizedPlayers.length === 0) return null;
+    // Empty players array is valid for SETUP status
+    // if (sanitizedPlayers.length === 0) return null;
 
     // Return sanitized game state
     return {
@@ -186,72 +187,41 @@ export const loadGameState = async (): Promise<StorageResult<GameState>> => {
       }
     }
     
-    // Validate the parsed data structure
-    if (!isValidGameState(parsedData)) {
-      console.error('Invalid game state structure:', parsedData);
-      
-      // Try to sanitize the data first
-      const sanitizedData = sanitizeGameState(parsedData);
-      if (sanitizedData) {
-        return {
-          success: true,
-          data: sanitizedData,
-          error: 'Dati del gioco riparati automaticamente.'
-        };
-      }
-      
-      // Try backup if main data is corrupted and sanitization failed
-      if (!usingBackup) {
-        try {
-          const backupData = await AsyncStorage.getItem(BACKUP_STORAGE_KEY);
-          if (backupData) {
-            const backupParsed = JSON.parse(backupData);
-            if (isValidGameState(backupParsed)) {
-              return {
-                success: true,
-                data: {
-                  ...backupParsed,
-                  createdAt: new Date(backupParsed.createdAt),
-                  updatedAt: new Date(backupParsed.updatedAt),
-                  endedAt: backupParsed.endedAt ? new Date(backupParsed.endedAt) : undefined
-                },
-                error: ERROR_MESSAGES.RECOVERY_SUCCESS
-              };
-            } else {
-              // Try to sanitize backup data
-              const sanitizedBackup = sanitizeGameState(backupParsed);
-              if (sanitizedBackup) {
-                return {
-                  success: true,
-                  data: sanitizedBackup,
-                  error: 'Dati recuperati e riparati dal backup.'
-                };
-              }
-            }
-          }
-        } catch (backupError) {
-          console.error('Backup recovery failed:', backupError);
-        }
-      }
-      
+    // Try to sanitize the data first, then validate
+    const sanitizedData = sanitizeGameState(parsedData);
+    if (sanitizedData && isValidGameState(sanitizedData)) {
       return {
-        success: false,
-        error: ERROR_MESSAGES.CORRUPTED_DATA
+        success: true,
+        data: sanitizedData
       };
     }
     
-    // Convert date strings back to Date objects
-    const gameState: GameState = {
-      ...parsedData,
-      createdAt: new Date(parsedData.createdAt),
-      updatedAt: new Date(parsedData.updatedAt),
-      endedAt: parsedData.endedAt ? new Date(parsedData.endedAt) : undefined
-    };
-    
+    // If sanitization failed or sanitized data is still invalid
+    console.error('Invalid game state structure:', parsedData);
+      
+    // Try backup if main data is corrupted and sanitization failed
+    if (!usingBackup) {
+      try {
+        const backupData = await AsyncStorage.getItem(BACKUP_STORAGE_KEY);
+        if (backupData) {
+          const backupParsed = JSON.parse(backupData);
+          const sanitizedBackup = sanitizeGameState(backupParsed);
+          if (sanitizedBackup && isValidGameState(sanitizedBackup)) {
+            return {
+              success: true,
+              data: sanitizedBackup,
+              error: ERROR_MESSAGES.RECOVERY_SUCCESS
+            };
+          }
+        }
+      } catch (backupError) {
+        console.error('Backup recovery failed:', backupError);
+      }
+    }
+      
     return {
-      success: true,
-      data: gameState,
-      error: usingBackup ? ERROR_MESSAGES.RECOVERY_SUCCESS : undefined
+      success: false,
+      error: ERROR_MESSAGES.CORRUPTED_DATA
     };
     
   } catch (error) {
