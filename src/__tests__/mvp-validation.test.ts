@@ -370,11 +370,12 @@ describe('MVP Validation and QA', () => {
       });
     });
 
-    it('should handle storage failures gracefully', async () => {
+    it('should handle storage failures gracefully for IN_PROGRESS games', async () => {
       // Mock both main and backup storage failures
       (AsyncStorage.setItem as jest.Mock).mockRejectedValue(new Error('Storage full'));
       
       const gameState = createInitialGameState();
+      gameState.status = GameStatus.IN_PROGRESS; // Must be IN_PROGRESS to actually save
       const saveResult = await saveGameState(gameState);
       
       expect(saveResult.success).toBe(false);

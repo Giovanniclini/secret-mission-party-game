@@ -219,8 +219,9 @@ export const sanitizePlayerName = (name: string): string => {
 
 // Check if game can be resumed
 export const canResumeGame = (gameState: GameState): boolean => {
-  return gameState.status !== GameStatus.SETUP && 
-         gameState.status !== GameStatus.FINISHED && 
+  // Only allow resuming games that are actually IN_PROGRESS
+  // Games in SETUP, CONFIGURING, or ASSIGNING should not persist
+  return gameState.status === GameStatus.IN_PROGRESS && 
          gameState.players.length > 0;
 };
 

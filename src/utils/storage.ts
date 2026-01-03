@@ -87,8 +87,15 @@ const sanitizeGameState = (data: any): GameState | null => {
 };
 
 // Save game state with backup and retry mechanism
+// Only saves when game is IN_PROGRESS to avoid persisting setup states
 export const saveGameState = async (gameState: GameState): Promise<StorageResult<void>> => {
   try {
+    // Only persist games that are actually IN_PROGRESS
+    // Games in SETUP, CONFIGURING, or ASSIGNING should not be saved
+    if (gameState.status !== GameStatus.IN_PROGRESS) {
+      return { success: true }; // Don't save, but don't error either
+    }
+
     const serializedState = JSON.stringify(gameState);
     
     // Try to save main state
@@ -190,6 +197,17 @@ export const loadGameState = async (): Promise<StorageResult<GameState>> => {
     // Try to sanitize the data first, then validate
     const sanitizedData = sanitizeGameState(parsedData);
     if (sanitizedData && isValidGameState(sanitizedData)) {
+      // Check if the loaded game should be persisted
+      // Only IN_PROGRESS games should persist, others should be cleared
+      if (sanitizedData.status !== GameStatus.IN_PROGRESS) {
+        // Clear the stored data and return fresh state
+        await clearGameState();
+        return {
+          success: true,
+          data: createInitialGameState()
+        };
+      }
+      
       return {
         success: true,
         data: sanitizedData
@@ -207,6 +225,15 @@ export const loadGameState = async (): Promise<StorageResult<GameState>> => {
           const backupParsed = JSON.parse(backupData);
           const sanitizedBackup = sanitizeGameState(backupParsed);
           if (sanitizedBackup && isValidGameState(sanitizedBackup)) {
+            // Check backup data status as well
+            if (sanitizedBackup.status !== GameStatus.IN_PROGRESS) {
+              await clearGameState();
+              return {
+                success: true,
+                data: createInitialGameState()
+              };
+            }
+            
             return {
               success: true,
               data: sanitizedBackup,
@@ -243,6 +270,23 @@ export const clearGameState = async (): Promise<StorageResult<void>> => {
     return {
       success: false,
       error: 'Impossibile cancellare i dati salvati.'
+    };
+  }
+};
+
+// Clear game state if it's not IN_PROGRESS (for cleanup on app start)
+export const clearNonProgressGameState = async (): Promise<StorageResult<void>> => {
+  try {
+    const result = await loadGameState();
+    if (result.success && result.data && result.data.status !== GameStatus.IN_PROGRESS) {
+      return await clearGameState();
+    }
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to clear non-progress game state:', error);
+    return {
+      success: false,
+      error: 'Errore durante la pulizia dei dati di gioco.'
     };
   }
 };

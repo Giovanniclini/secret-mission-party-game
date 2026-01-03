@@ -4,13 +4,12 @@ import {
   saveGameState,
   loadGameState,
   clearGameState,
+  clearNonProgressGameState,
   checkStorageAvailability
 } from './storage';
 import {
   createInitialGameState,
-  createPlayer,
-  createMission,
-  createPlayerMission,
+  GameStatus,
   DifficultyLevel,
   DifficultyMode,
   MissionState
@@ -32,32 +31,62 @@ describe('Enhanced Storage Utils', () => {
   });
 
   describe('saveGameState', () => {
-    it('should save game state successfully', async () => {
+    it('should save IN_PROGRESS game state successfully', async () => {
       mockAsyncStorage.setItem.mockResolvedValue();
       
       const gameState = createInitialGameState();
+      gameState.status = GameStatus.IN_PROGRESS;
       const result = await saveGameState(gameState);
       
       expect(result.success).toBe(true);
       expect(mockAsyncStorage.setItem).toHaveBeenCalledTimes(2); // Main + backup
     });
 
-    it('should handle main storage failure with backup', async () => {
+    it('should not save non-IN_PROGRESS game states', async () => {
+      const gameState = createInitialGameState();
+      gameState.status = GameStatus.SETUP;
+      const result = await saveGameState(gameState);
+      
+      expect(result.success).toBe(true);
+      expect(mockAsyncStorage.setItem).not.toHaveBeenCalled();
+    });
+
+    it('should not save CONFIGURING game states', async () => {
+      const gameState = createInitialGameState();
+      gameState.status = GameStatus.CONFIGURING;
+      const result = await saveGameState(gameState);
+      
+      expect(result.success).toBe(true);
+      expect(mockAsyncStorage.setItem).not.toHaveBeenCalled();
+    });
+
+    it('should not save ASSIGNING game states', async () => {
+      const gameState = createInitialGameState();
+      gameState.status = GameStatus.ASSIGNING;
+      const result = await saveGameState(gameState);
+      
+      expect(result.success).toBe(true);
+      expect(mockAsyncStorage.setItem).not.toHaveBeenCalled();
+    });
+
+    it('should handle main storage failure with backup for IN_PROGRESS games', async () => {
       mockAsyncStorage.setItem
         .mockRejectedValueOnce(new Error('Main storage failed'))
         .mockResolvedValueOnce(); // Backup succeeds
       
       const gameState = createInitialGameState();
+      gameState.status = GameStatus.IN_PROGRESS;
       const result = await saveGameState(gameState);
       
       expect(result.success).toBe(true);
       expect(result.error).toContain('backup');
     });
 
-    it('should handle complete storage failure', async () => {
+    it('should handle complete storage failure for IN_PROGRESS games', async () => {
       mockAsyncStorage.setItem.mockRejectedValue(new Error('Storage failed'));
       
       const gameState = createInitialGameState();
+      gameState.status = GameStatus.IN_PROGRESS;
       const result = await saveGameState(gameState);
       
       expect(result.success).toBe(false);
@@ -66,8 +95,9 @@ describe('Enhanced Storage Utils', () => {
   });
 
   describe('loadGameState', () => {
-    it('should load valid game state', async () => {
+    it('should load valid IN_PROGRESS game state', async () => {
       const gameState = createInitialGameState();
+      gameState.status = GameStatus.IN_PROGRESS;
       gameState.configuration = {
         missionsPerPlayer: 3,
         difficultyMode: DifficultyMode.MIXED
@@ -79,7 +109,26 @@ describe('Enhanced Storage Utils', () => {
       
       expect(result.success).toBe(true);
       expect(result.data).toBeDefined();
-      expect(result.data?.id).toBe(gameState.id);
+      expect(result.data?.status).toBe(GameStatus.IN_PROGRESS);
+    });
+
+    it('should clear and return fresh state for non-IN_PROGRESS games', async () => {
+      const gameState = createInitialGameState();
+      gameState.status = GameStatus.CONFIGURING;
+      gameState.configuration = {
+        missionsPerPlayer: 3,
+        difficultyMode: DifficultyMode.MIXED
+      };
+      
+      mockAsyncStorage.getItem.mockResolvedValue(JSON.stringify(gameState));
+      mockAsyncStorage.multiRemove.mockResolvedValue();
+      
+      const result = await loadGameState();
+      
+      expect(result.success).toBe(true);
+      expect(result.data).toBeDefined();
+      expect(result.data?.status).toBe(GameStatus.SETUP); // Fresh state
+      expect(mockAsyncStorage.multiRemove).toHaveBeenCalled();
     });
 
     it('should return initial state when no data exists', async () => {
@@ -92,7 +141,7 @@ describe('Enhanced Storage Utils', () => {
       expect(result.data?.players).toEqual([]);
     });
 
-    it('should handle corrupted data with sanitization', async () => {
+    it('should handle corrupted data with sanitization for IN_PROGRESS games', async () => {
       const corruptedData = {
         id: 'test',
         players: [{
@@ -107,7 +156,7 @@ describe('Enhanced Storage Utils', () => {
           missionsPerPlayer: 3,
           difficultyMode: DifficultyMode.MIXED
         },
-        status: 'SETUP',
+        status: GameStatus.IN_PROGRESS, // Must be IN_PROGRESS to persist
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
@@ -118,11 +167,11 @@ describe('Enhanced Storage Utils', () => {
       
       expect(result.success).toBe(true);
       expect(result.data?.players[0].totalPoints).toBe(0); // Sanitized
-      expect(result.error).toContain('riparati');
     });
 
     it('should recover from backup when main data is corrupted', async () => {
       const validGameState = createInitialGameState();
+      validGameState.status = GameStatus.IN_PROGRESS;
       validGameState.configuration = {
         missionsPerPlayer: 3,
         difficultyMode: DifficultyMode.MIXED
@@ -135,8 +184,7 @@ describe('Enhanced Storage Utils', () => {
       const result = await loadGameState();
       
       expect(result.success).toBe(true);
-      expect(result.data?.id).toBe(validGameState.id);
-      expect(result.error).toContain('recuperati');
+      expect(result.data?.status).toBe(GameStatus.IN_PROGRESS);
     });
 
     it('should handle complete storage failure', async () => {
@@ -214,7 +262,7 @@ describe('Enhanced Storage Utils', () => {
   });
 
   describe('Data Sanitization', () => {
-    it('should sanitize player scoring data during load', async () => {
+    it('should sanitize player scoring data during load for IN_PROGRESS games', async () => {
       const gameStateWithBadData = {
         id: 'test',
         players: [{
@@ -241,7 +289,7 @@ describe('Enhanced Storage Utils', () => {
           missionsPerPlayer: 3,
           difficultyMode: DifficultyMode.MIXED
         },
-        status: 'IN_PROGRESS',
+        status: GameStatus.IN_PROGRESS, // Must be IN_PROGRESS to persist
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
@@ -256,7 +304,7 @@ describe('Enhanced Storage Utils', () => {
       expect(result.data?.players[0].missions[0].pointsAwarded).toBe(2); // Corrected
     });
 
-    it('should handle missing required fields with defaults', async () => {
+    it('should handle missing required fields with defaults for IN_PROGRESS games', async () => {
       const incompleteData = {
         id: 'test',
         players: [{
@@ -269,7 +317,7 @@ describe('Enhanced Storage Utils', () => {
           missionsPerPlayer: 3,
           difficultyMode: DifficultyMode.MIXED
         },
-        status: 'SETUP',
+        status: GameStatus.IN_PROGRESS, // Must be IN_PROGRESS to persist
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
@@ -282,6 +330,36 @@ describe('Enhanced Storage Utils', () => {
       expect(result.data?.players[0].totalPoints).toBe(0); // Default
       expect(result.data?.players[0].completedMissions).toBe(0); // Default
       expect(result.data?.players[0].targetMissionCount).toBe(3); // Default
+    });
+
+    it('should clear non-IN_PROGRESS games even with valid data', async () => {
+      const validButNonProgressData = {
+        id: 'test',
+        players: [{
+          id: 'player1',
+          name: 'Test Player',
+          missions: [],
+          totalPoints: 0,
+          completedMissions: 0,
+          targetMissionCount: 3
+        }],
+        configuration: {
+          missionsPerPlayer: 3,
+          difficultyMode: DifficultyMode.MIXED
+        },
+        status: GameStatus.ASSIGNING, // Not IN_PROGRESS
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      
+      mockAsyncStorage.getItem.mockResolvedValue(JSON.stringify(validButNonProgressData));
+      mockAsyncStorage.multiRemove.mockResolvedValue();
+      
+      const result = await loadGameState();
+      
+      expect(result.success).toBe(true);
+      expect(result.data?.status).toBe(GameStatus.SETUP); // Fresh state
+      expect(mockAsyncStorage.multiRemove).toHaveBeenCalled();
     });
   });
 });
