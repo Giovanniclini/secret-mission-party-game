@@ -2,7 +2,7 @@
   "expo": {
     "name": "Secret Mission",
     "slug": "secret-mission",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/secret-mission-logo-appstore.png",
     "scheme": "secretmission",
@@ -16,7 +16,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.devcat.secretmission",
-      "buildNumber": "2",
+      "buildNumber": "4",
       "infoPlist": {
         "CFBundleDisplayName": "Secret Mission",
         "NSCameraUsageDescription": "This app does not use the camera.",

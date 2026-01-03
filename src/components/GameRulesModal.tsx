@@ -6,7 +6,6 @@ import {
   Modal,
   ScrollView,
   TouchableOpacity,
-  Dimensions,
 } from 'react-native';
 import { useTheme } from '../theme';
 
@@ -14,8 +13,6 @@ interface GameRulesModalProps {
   visible: boolean;
   onClose: () => void;
 }
-
-const { height: screenHeight } = Dimensions.get('window');
 
 const GameRulesModal: React.FC<GameRulesModalProps> = ({ visible, onClose }) => {
   const theme = useTheme();
@@ -82,7 +79,7 @@ const GameRulesModal: React.FC<GameRulesModalProps> = ({ visible, onClose }) => 
               • Ogni giocatore riceve le sue missioni segrete
             </Text>
             <Text style={styles.bulletText}>
-              • Usa il pulsante "Tieni premuto per rivelare" per vedere le tue missioni
+              • Usa il pulsante &ldquo;Tieni premuto per rivelare&rdquo; per vedere le tue missioni
             </Text>
             <Text style={styles.bulletText}>
               • Assicurati che nessun altro stia guardando!
@@ -145,7 +142,7 @@ const GameRulesModal: React.FC<GameRulesModalProps> = ({ visible, onClose }) => 
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>💡 Consigli</Text>
             <Text style={styles.bulletText}>
-              • Sii discreto nell'eseguire le tue missioni
+              • Sii discreto nell&apos;eseguire le tue missioni
             </Text>
             <Text style={styles.bulletText}>
               • Osserva attentamente gli altri giocatori
